@@ -70,6 +70,12 @@ class Lexer:
         elif self.current_character == ']':
           tokens.append(Token(TT_RIGHT_SQUARE, position_start=self.position))
           self.advance()
+        elif self.current_character == '{':
+          tokens.append(Token(TT_LEFT_BRACE, position_start=self.position))
+          self.advance()
+        elif self.current_character == '}':
+          tokens.append(Token(TT_RIGHT_BRACE, position_start=self.position))
+          self.advance()
         elif self.current_character == '!':
           token, error = self.not_equals()
           if error: return [], error

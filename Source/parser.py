@@ -635,120 +635,263 @@ class Parser:
 
     return parseResult.success(WhileNode(condition, body, False))
 
+  # def function_definition(self):
+  #   parseResult = ParseResult()
+
+  #   if not self.current_token.matches(TT_KEYWORD, 'func'):
+  #     return parseResult.failure(InvalidSyntaxError(
+  #       self.current_token.position_start, self.current_token.position_end,
+  #       f"Expected 'func'"
+  #     ))
+
+  #   parseResult.register_advancement()
+  #   self.advance()
+
+  #   if self.current_token.type == TT_IDENTIFIER:
+  #     variable_name_token = self.current_token
+  #     parseResult.register_advancement()
+  #     self.advance()
+  #     if self.current_token.type != TT_LEFT_PAREN:
+  #       return parseResult.failure(InvalidSyntaxError(
+  #         self.current_token.position_start, self.current_token.position_end,
+  #         f"Expected '('"
+  #       ))
+  #   else:
+  #     variable_name_token = None
+  #     if self.current_token.type != TT_LEFT_PAREN:
+  #       return parseResult.failure(InvalidSyntaxError(
+  #         self.current_token.position_start, self.current_token.position_end,
+  #         f"Expected identifier or '('"
+  #       ))
+
+  #   parseResult.register_advancement()
+  #   self.advance()
+  #   argument_name_tokens = []
+
+  #   if self.current_token.type == TT_IDENTIFIER:
+  #     argument_name_tokens.append(self.current_token)
+  #     parseResult.register_advancement()
+  #     self.advance()
+
+  #     while self.current_token.type == TT_COMMA:
+  #       parseResult.register_advancement()
+  #       self.advance()
+
+  #       if self.current_token.type != TT_IDENTIFIER:
+  #         return parseResult.failure(InvalidSyntaxError(
+  #           self.current_token.position_start, self.current_token.position_end,
+  #           f"Expected identifier"
+  #         ))
+
+  #       argument_name_tokens.append(self.current_token)
+  #       parseResult.register_advancement()
+  #       self.advance()
+
+  #     if self.current_token.type != TT_RIGHT_PAREN:
+  #       return parseResult.failure(InvalidSyntaxError(
+  #         self.current_token.position_start, self.current_token.position_end,
+  #         f"Expected ',' or ')'"
+  #       ))
+  #   else:
+  #     if self.current_token.type != TT_RIGHT_PAREN:
+  #       return parseResult.failure(InvalidSyntaxError(
+  #         self.current_token.position_start, self.current_token.position_end,
+  #         f"Expected identifier or ')'"
+  #       ))
+
+  #   parseResult.register_advancement()
+  #   self.advance()
+
+  #   if self.current_token.type == TT_ARROW:
+  #     parseResult.register_advancement()
+  #     self.advance()
+
+  #     body = parseResult.register(self.expression())
+  #     if parseResult.error:
+  #         return parseResult.failure(InvalidSyntaxError(
+  #             parseResult.error.position_start, parseResult.error.position_end, parseResult.error.details
+  #         ))
+
+  #     return parseResult.success(FuncDefNode(
+  #       variable_name_token,
+  #       argument_name_tokens,
+  #       body,
+  #       True
+  #     ))
+
+  #   if self.current_token.type != TT_NEWLINE:
+  #     return parseResult.failure(InvalidSyntaxError(
+  #       self.current_token.position_start, self.current_token.position_end,
+  #       f"Expected '->' or NEWLINE"
+  #     ))
+
+  #   parseResult.register_advancement()
+  #   self.advance()
+
+  #   body = parseResult.register(self.statements())
+  #   if parseResult.error:
+  #       return parseResult.failure(InvalidSyntaxError(
+  #           parseResult.error.position_start, parseResult.error.position_end, parseResult.error.details
+  #       ))
+
+  #   if not self.current_token.matches(TT_KEYWORD, 'end'):
+  #     return parseResult.failure(InvalidSyntaxError(
+  #       self.current_token.position_start, self.current_token.position_end,
+  #       f"Expected 'end'"
+  #     ))
+
+  #   parseResult.register_advancement()
+  #   self.advance()
+
+  #   return parseResult.success(FuncDefNode(
+  #     variable_name_token,
+  #     argument_name_tokens,
+  #     body,
+  #     False
+  #   ))
   def function_definition(self):
-    parseResult = ParseResult()
+      parseResult = ParseResult()
 
-    if not self.current_token.matches(TT_KEYWORD, 'func'):
-      return parseResult.failure(InvalidSyntaxError(
-        self.current_token.position_start, self.current_token.position_end,
-        f"Expected 'func'"
-      ))
-
-    parseResult.register_advancement()
-    self.advance()
-
-    if self.current_token.type == TT_IDENTIFIER:
-      variable_name_token = self.current_token
-      parseResult.register_advancement()
-      self.advance()
-      if self.current_token.type != TT_LEFT_PAREN:
-        return parseResult.failure(InvalidSyntaxError(
-          self.current_token.position_start, self.current_token.position_end,
-          f"Expected '('"
-        ))
-    else:
-      variable_name_token = None
-      if self.current_token.type != TT_LEFT_PAREN:
-        return parseResult.failure(InvalidSyntaxError(
-          self.current_token.position_start, self.current_token.position_end,
-          f"Expected identifier or '('"
-        ))
-
-    parseResult.register_advancement()
-    self.advance()
-    argument_name_tokens = []
-
-    if self.current_token.type == TT_IDENTIFIER:
-      argument_name_tokens.append(self.current_token)
-      parseResult.register_advancement()
-      self.advance()
-
-      while self.current_token.type == TT_COMMA:
-        parseResult.register_advancement()
-        self.advance()
-
-        if self.current_token.type != TT_IDENTIFIER:
+      if not self.current_token.matches(TT_KEYWORD, 'func'):
           return parseResult.failure(InvalidSyntaxError(
-            self.current_token.position_start, self.current_token.position_end,
-            f"Expected identifier"
+              self.current_token.position_start, self.current_token.position_end,
+              f"Expected 'func'"
           ))
 
-        argument_name_tokens.append(self.current_token)
-        parseResult.register_advancement()
-        self.advance()
-
-      if self.current_token.type != TT_RIGHT_PAREN:
-        return parseResult.failure(InvalidSyntaxError(
-          self.current_token.position_start, self.current_token.position_end,
-          f"Expected ',' or ')'"
-        ))
-    else:
-      if self.current_token.type != TT_RIGHT_PAREN:
-        return parseResult.failure(InvalidSyntaxError(
-          self.current_token.position_start, self.current_token.position_end,
-          f"Expected identifier or ')'"
-        ))
-
-    parseResult.register_advancement()
-    self.advance()
-
-    if self.current_token.type == TT_ARROW:
       parseResult.register_advancement()
       self.advance()
 
-      body = parseResult.register(self.expression())
-      if parseResult.error:
-          return parseResult.failure(InvalidSyntaxError(
-              parseResult.error.position_start, parseResult.error.position_end, parseResult.error.details
+      if self.current_token.type == TT_IDENTIFIER:
+          variable_name_token = self.current_token
+          parseResult.register_advancement()
+          self.advance()
+          if self.current_token.type != TT_LEFT_PAREN:
+              return parseResult.failure(InvalidSyntaxError(
+                  self.current_token.position_start, self.current_token.position_end,
+                  f"Expected '('"
+              ))
+      else:
+          variable_name_token = None
+          if self.current_token.type != TT_LEFT_PAREN:
+              return parseResult.failure(InvalidSyntaxError(
+                  self.current_token.position_start, self.current_token.position_end,
+                  f"Expected identifier or '('"
+              ))
+
+      parseResult.register_advancement()
+      self.advance()
+      argument_name_tokens = []
+
+      if self.current_token.type == TT_IDENTIFIER:
+          argument_name_tokens.append(self.current_token)
+          parseResult.register_advancement()
+          self.advance()
+
+          while self.current_token.type == TT_COMMA:
+              parseResult.register_advancement()
+              self.advance()
+
+              if self.current_token.type != TT_IDENTIFIER:
+                  return parseResult.failure(InvalidSyntaxError(
+                      self.current_token.position_start, self.current_token.position_end,
+                      f"Expected identifier"
+                  ))
+
+              argument_name_tokens.append(self.current_token)
+              parseResult.register_advancement()
+              self.advance()
+
+          if self.current_token.type != TT_RIGHT_PAREN:
+              return parseResult.failure(InvalidSyntaxError(
+                  self.current_token.position_start, self.current_token.position_end,
+                  f"Expected ',' or ')'"
+              ))
+      else:
+          if self.current_token.type != TT_RIGHT_PAREN:
+              return parseResult.failure(InvalidSyntaxError(
+                  self.current_token.position_start, self.current_token.position_end,
+                  f"Expected identifier or ')'"
+              ))
+
+      parseResult.register_advancement()
+      self.advance()
+
+      # Handle arrow-style single-expression function
+      if self.current_token.type == TT_ARROW:
+          parseResult.register_advancement()
+          self.advance()
+
+          body = parseResult.register(self.expression())
+          if parseResult.error:
+              return parseResult.failure(InvalidSyntaxError(
+                  parseResult.error.position_start, parseResult.error.position_end, parseResult.error.details
+              ))
+
+          return parseResult.success(FuncDefNode(
+              variable_name_token,
+              argument_name_tokens,
+              body,
+              True
           ))
 
-      return parseResult.success(FuncDefNode(
-        variable_name_token,
-        argument_name_tokens,
-        body,
-        True
-      ))
+      # MULTI-STATEMENT FUNCTION STARTS HERE
+      # Accept either NEWLINE or LEFT_BRACE after parameter list
+      if self.current_token.type == TT_NEWLINE:
+          parseResult.register_advancement()
+          self.advance()
 
-    if self.current_token.type != TT_NEWLINE:
+          body = parseResult.register(self.statements())
+          if parseResult.error:
+              return parseResult.failure(InvalidSyntaxError(
+                  parseResult.error.position_start, parseResult.error.position_end, parseResult.error.details
+              ))
+
+          if not self.current_token.matches(TT_KEYWORD, 'end'):
+              return parseResult.failure(InvalidSyntaxError(
+                  self.current_token.position_start, self.current_token.position_end,
+                  f"Expected 'end'"
+              ))
+
+          parseResult.register_advancement()
+          self.advance()
+
+          return parseResult.success(FuncDefNode(
+              variable_name_token,
+              argument_name_tokens,
+              body,
+              False
+          ))
+
+      elif self.current_token.type == TT_LEFT_BRACE:
+          parseResult.register_advancement()
+          self.advance()
+
+          body = parseResult.register(self.statements())
+          if parseResult.error:
+              return parseResult.failure(InvalidSyntaxError(
+                  parseResult.error.position_start, parseResult.error.position_end, parseResult.error.details
+              ))
+
+          if self.current_token.type != TT_RIGHT_BRACE:
+              return parseResult.failure(InvalidSyntaxError(
+                  self.current_token.position_start, self.current_token.position_end,
+                  f"Expected '}}'"
+              ))
+
+          parseResult.register_advancement()
+          self.advance()
+
+          return parseResult.success(FuncDefNode(
+              variable_name_token,
+              argument_name_tokens,
+              body,
+              False
+          ))
+
       return parseResult.failure(InvalidSyntaxError(
-        self.current_token.position_start, self.current_token.position_end,
-        f"Expected '->' or NEWLINE"
+          self.current_token.position_start, self.current_token.position_end,
+          f"Expected '->', '{{', or NEWLINE"
       ))
-
-    parseResult.register_advancement()
-    self.advance()
-
-    body = parseResult.register(self.statements())
-    if parseResult.error:
-        return parseResult.failure(InvalidSyntaxError(
-            parseResult.error.position_start, parseResult.error.position_end, parseResult.error.details
-        ))
-
-    if not self.current_token.matches(TT_KEYWORD, 'end'):
-      return parseResult.failure(InvalidSyntaxError(
-        self.current_token.position_start, self.current_token.position_end,
-        f"Expected 'end'"
-      ))
-
-    parseResult.register_advancement()
-    self.advance()
-
-    return parseResult.success(FuncDefNode(
-      variable_name_token,
-      argument_name_tokens,
-      body,
-      False
-    ))
 
   ###################################
 
