@@ -3,7 +3,7 @@
 # functions
 func oopify(prefix) => prefix + "oop"
 
-func join(elements, separator)
+func join(elements, separator){
     var result = ""
     var len = len(elements)
 
@@ -14,9 +14,9 @@ func join(elements, separator)
     end
 
     return result
-end
+}
 
-func map(elements, fn)
+func map(elements, fn){
     var new_elements = []
 
     for i = 0 to len(elements):
@@ -24,7 +24,7 @@ func map(elements, fn)
     end
 
     return new_elements
-end
+}
 
 # main code
 print("Greetings universe!")
