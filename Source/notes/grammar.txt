@@ -1,11 +1,12 @@
 statements  : NEWLINE* statement (NEWLINE+ statement)* NEWLINE*
 
-statement	: KEYWORD:RETURN expr?
+statement	  : KEYWORD:RETURN expr?
             : KEYWORD:CONTINUE
             : KEYWORD:BREAK
             : expr
 
-expr        : KEYWORD:VAR IDENTIFIER (COLON IDENTIFIER)? EQ expr
+expr        : KEYWORD:VAR IDENTIFIER COLON expr
+            : TYPE_IDENTIFIER IDENTIFIER (EQ|COLON) expr
             : comp-expr ((KEYWORD:AND|KEYWORD:OR) comp-expr)*
 
 comp-expr   : NOT comp-expr
@@ -32,28 +33,32 @@ atom        : INT|FLOAT|STRING|IDENTIFIER
 
 list-expr   : LSQUARE (expr (COMMA expr)*)? RSQUARE
 
-if-expr     : KEYWORD:IF expr KEYWORD:THEN
+if-expr     : KEYWORD:IF expr (COLON|LBRACE)
               (statement if-expr-b|if-expr-c?)
-            | (NEWLINE statements KEYWORD:END|if-expr-b|if-expr-c)
+            | (NEWLINE statements (KEYWORD:END|RBRACE)|if-expr-b|if-expr-c)
 
-if-expr-b   : KEYWORD:ELIF expr KEYWORD:THEN
+if-expr-b   : KEYWORD:ELIF expr (COLON|LBRACE)
               (statement if-expr-b|if-expr-c?)
-            | (NEWLINE statements KEYWORD:END|if-expr-b|if-expr-c)
+            | (NEWLINE statements (KEYWORD:END|RBRACE)|if-expr-b|if-expr-c)
 
-if-expr-c   : KEYWORD:ELSE
+if-expr-c   : KEYWORD:ELSE (COLON|LBRACE)
               statement
-            | (NEWLINE statements KEYWORD:END)
+            | (NEWLINE statements (KEYWORD:END|RBRACE))
 
 for-expr    : KEYWORD:FOR IDENTIFIER EQ expr KEYWORD:TO expr
-              (KEYWORD:STEP expr)? KEYWORD:THEN
+              (KEYWORD:STEP expr)? (COLON|LBRACE)
               statement
-            | (NEWLINE statements KEYWORD:END)
+            | (NEWLINE statements (KEYWORD:END|RBRACE))
 
-while-expr  : KEYWORD:WHILE expr KEYWORD:THEN
+while-expr  : KEYWORD:WHILE expr (COLON|LBRACE)
               statement
-            | (NEWLINE statements KEYWORD:END)
+            | (NEWLINE statements (KEYWORD:END|RBRACE))
 
-func-def    : KEYWORD:FUN IDENTIFIER?
-              LPAREN (IDENTIFIER (COMMA IDENTIFIER)*)? RPAREN
+func-def    : KEYWORD:FUNC IDENTIFIER?
+              LPAREN (param-def (COMMA param-def)*)? RPAREN
               (ARROW expr)
-            | (NEWLINE statements KEYWORD:END)
+            | ((COLON|LBRACE) NEWLINE statements (KEYWORD:END|RBRACE))
+
+param-def   : TYPE_IDENTIFIER IDENTIFIER
+
+TYPE_IDENTIFIER: 'int'|'float'|'string'|'list'|'function'

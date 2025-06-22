@@ -1,9 +1,9 @@
 # This is a very useful piece of software
 
 # functions
-func oopify(prefix) => prefix + "oop"
+func oopify(string prefix) => prefix + "oop"
 
-func join(elements, separator){
+func join(list elements, string separator){
     var result: ""
     var len: len(elements)
 
@@ -16,12 +16,12 @@ func join(elements, separator){
     return result
 }
 
-func map(elements, fn){
+func map(list elements, function fn){
     var new_elements: []
 
-    for i = 0 to len(elements):
+    for i = 0 to len(elements){
         append(new_elements, fn(elements/i))
-    end
+    }
 
     return new_elements
 }

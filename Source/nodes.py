@@ -34,9 +34,11 @@ class VarAccessNode:
     self.position_end = self.variable_name_token.position_end
 
 class VarAssignNode:
-  def __init__(self, variable_name_token, value_node):
+  def __init__(self, variable_name_token, value_node, type_token=None):
     self.variable_name_token = variable_name_token
     self.value_node = value_node
+    self.type_token = type_token
+
     self.position_start = self.variable_name_token.position_start
     self.position_end = self.value_node.position_end
 
@@ -88,9 +90,10 @@ class WhileNode:
     self.position_end = self.body_node.position_end
 
 class FuncDefNode:
-  def __init__(self, variable_name_token, argument_name_tokens, body_node, should_auto_return):
+  def __init__(self, variable_name_token, argument_name_tokens, body_node, should_auto_return, argument_type_tokens=None):
     self.variable_name_token = variable_name_token
     self.argument_name_tokens = argument_name_tokens
+    self.argument_type_tokens = argument_type_tokens or [None] * len(argument_name_tokens)
     self.body_node = body_node
     self.should_auto_return = should_auto_return
 
