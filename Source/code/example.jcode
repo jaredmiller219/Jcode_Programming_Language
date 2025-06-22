@@ -7,11 +7,11 @@ func join(elements, separator){
     var result: ""
     var len: len(elements)
 
-    for i = 0 to len:
+    for i = 0 to len {
         var result: result + elements/i
         if i != len - 1:
 			var result: result + separator
-    end
+    }
 
     return result
 }

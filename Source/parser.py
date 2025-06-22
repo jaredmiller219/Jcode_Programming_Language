@@ -471,10 +471,11 @@ class Parser:
     condition = parseResult.register(self.expression())
     if parseResult.error: return parseResult
 
-    if self.current_token.type != TT_COLON:
+    # Accept either colon or left brace
+    if self.current_token.type != TT_COLON and self.current_token.type != TT_LEFT_BRACE:
       return parseResult.failure(InvalidSyntaxError(
         self.current_token.position_start, self.current_token.position_end,
-        f"Expected ':'"
+        f"Expected ':' or '{{'"
       ))
 
     parseResult.register_advancement()
@@ -556,36 +557,53 @@ class Parser:
     end_value = parseResult.register(self.expression())
     if parseResult.error: return parseResult
 
+    step_value = None
     if self.current_token.matches(TT_KEYWORD, 'step'):
       parseResult.register_advancement()
       self.advance()
 
       step_value = parseResult.register(self.expression())
       if parseResult.error: return parseResult
-    else:
-      step_value = None
 
-    # --- CHANGED: Expect ':' instead of 'then'
-    if self.current_token.type != TT_COLON:
-      return parseResult.failure(InvalidSyntaxError(
-        self.current_token.position_start, self.current_token.position_end,
-        f"Expected ':'"
-      ))
+    # Accept either colon, newline, or left brace
+    if self.current_token.type == TT_COLON:
+      parseResult.register_advancement()
+      self.advance()
 
-    parseResult.register_advancement()
-    self.advance()
+      if self.current_token.type == TT_NEWLINE:
+        parseResult.register_advancement()
+        self.advance()
 
-    if self.current_token.type == TT_NEWLINE:
+        body = parseResult.register(self.statements())
+        if parseResult.error: return parseResult
+
+        if not self.current_token.matches(TT_KEYWORD, 'end'):
+          return parseResult.failure(InvalidSyntaxError(
+            self.current_token.position_start, self.current_token.position_end,
+            f"Expected 'end'"
+          ))
+
+        parseResult.register_advancement()
+        self.advance()
+
+        return parseResult.success(ForNode(variable_name, start_value, end_value, step_value, body, True))
+
+      body = parseResult.register(self.statement())
+      if parseResult.error: return parseResult
+
+      return parseResult.success(ForNode(variable_name, start_value, end_value, step_value, body, False))
+
+    elif self.current_token.type == TT_LEFT_BRACE:
       parseResult.register_advancement()
       self.advance()
 
       body = parseResult.register(self.statements())
       if parseResult.error: return parseResult
 
-      if not self.current_token.matches(TT_KEYWORD, 'end'):
+      if self.current_token.type != TT_RIGHT_BRACE:
         return parseResult.failure(InvalidSyntaxError(
           self.current_token.position_start, self.current_token.position_end,
-          f"Expected 'end'"
+          f"Expected '}}'"
         ))
 
       parseResult.register_advancement()
@@ -593,10 +611,11 @@ class Parser:
 
       return parseResult.success(ForNode(variable_name, start_value, end_value, step_value, body, True))
 
-    body = parseResult.register(self.statement())
-    if parseResult.error: return parseResult
-
-    return parseResult.success(ForNode(variable_name, start_value, end_value, step_value, body, False))
+    else:
+      return parseResult.failure(InvalidSyntaxError(
+        self.current_token.position_start, self.current_token.position_end,
+        f"Expected ':' or '{{'"
+      ))
 
   # def while_expression(self):
   #   parseResult = ParseResult()
