@@ -73,9 +73,19 @@
           "end": "$"
         },
         {
+          "name": "comment.line.number-sign.jcode",
+          "begin": "#",
+          "end": "$"
+        },
+        {
           "name": "comment.block.jcode",
           "begin": "/\\*",
-          "end": "\\*/"
+          "end": "\\*/",
+          "captures": {
+            "0": {
+              "name": "punctuation.definition.comment.jcode"
+            }
+          }
         }
       ]
     },

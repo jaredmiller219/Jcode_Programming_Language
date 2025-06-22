@@ -14,7 +14,7 @@ comp-expr   : NOT comp-expr
 
 arith-expr  : term ((PLUS|MINUS) term)*
 
-term        : factor ((MUL|DIV) factor)*
+term        : factor ((MULTIPLY|DIVIDE) factor)*
 
 factor      : (PLUS|MINUS) factor
             : power
@@ -22,6 +22,7 @@ factor      : (PLUS|MINUS) factor
 power       : call (POW factor)*
 
 call        : atom (LPAREN (expr (COMMA expr)*)? RPAREN)?
+            : atom (LSQUARE expr RSQUARE)?
 
 atom        : INT|FLOAT|STRING|IDENTIFIER
             : LPAREN expr RPAREN

@@ -31,6 +31,8 @@ class Lexer:
             self.skip_comment()
         elif self.current_character == '/' and self.check_next_character('/'):
             self.skip_double_slash_comment()
+        elif self.current_character == '/' and self.check_next_character('*'):
+            self.skip_block_comment()
         elif self.current_character in ';\n':
             tokens.append(Token(TT_NEWLINE, position_start=self.position))
             self.advance()
@@ -203,6 +205,26 @@ class Lexer:
     self.advance()
     while self.current_character != '\n': self.advance()
     self.advance()
+
+  def skip_block_comment(self):
+    self.advance()  # Skip the *
+    self.advance()  # Skip the opening /
+
+    nesting_level = 1
+
+    while self.current_character != None and nesting_level > 0:
+      # Check for nested block comment start
+      if self.current_character == '/' and self.check_next_character('*'):
+        self.advance()  # Skip /
+        self.advance()  # Skip *
+        nesting_level += 1
+      # Check for block comment end
+      elif self.current_character == '*' and self.check_next_character('/'):
+        self.advance()  # Skip *
+        self.advance()  # Skip /
+        nesting_level -= 1
+      else:
+        self.advance()
 
   def check_next_character(self, string):
     for offset, character in enumerate(string):
