@@ -45,17 +45,17 @@ class Interpreter:
   def visit_VarAccessNode(self, node, context):
     runtimeResult = RuntimeResult()
     variable_name = node.variable_name_token.value
-    variable_value = context.symbol_table.get(variable_name)
+    value = context.symbol_table.get(variable_name)
 
-    if not variable_value:
+    if value is None:
       return runtimeResult.failure(RuntimeError(
         node.position_start, node.position_end,
         f"'{variable_name}' is not defined",
         context
       ))
 
-    variable_value = variable_value.copy().set_position(node.position_start, node.position_end).set_context(context)
-    return runtimeResult.success(variable_value)
+    value = value.copy().set_position(node.position_start, node.position_end).set_context(context)
+    return runtimeResult.success(value)
 
   def visit_VarAssignNode(self, node, context):
     runtimeResult = RuntimeResult()

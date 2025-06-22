@@ -6,11 +6,13 @@ func oopify(string prefix) return prefix + "oop"
 func join(list elements, string separator){
     string result: ""
     var len: len(elements)
+    int x = 2
 
     for i = 0 to len {
         var result: result + elements/i
         if i != len - 1:
 			var result: result + separator
+            print(x)
     }
 
     return result

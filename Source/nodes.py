@@ -34,10 +34,11 @@ class VarAccessNode:
     self.position_end = self.variable_name_token.position_end
 
 class VarAssignNode:
-  def __init__(self, variable_name_token, value_node, type_token=None):
+  def __init__(self, variable_name_token, value_node, type_token=None, is_constant=False):
     self.variable_name_token = variable_name_token
     self.value_node = value_node
     self.type_token = type_token
+    self.is_constant = is_constant
 
     self.position_start = self.variable_name_token.position_start
     self.position_end = self.value_node.position_end

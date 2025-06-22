@@ -51,3 +51,8 @@ class RuntimeError(Error):
       context = context.parent
 
     return 'Traceback (most recent call last):\n' + result
+
+class ConstantReassignmentError(Error):
+  def __init__(self, position_start, position_end, variable_name):
+    message = f"Cannot reassign '{variable_name}' with '='. If you meant to declare a variable, use 'var {variable_name}: value'"
+    super().__init__(position_start, position_end, 'Constant Reassignment Error', message)
