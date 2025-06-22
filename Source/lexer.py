@@ -24,7 +24,7 @@ class Lexer:
   def Tokenize(self):
     tokens = []
 
-    while self.current_character != None:
+    while self.current_character is not None:
         if self.current_character in ' \t':
             self.advance()
         elif self.current_character == '#':
@@ -105,7 +105,7 @@ class Lexer:
     dot_count = 0
     position_start = self.position.copy()
 
-    while self.current_character != None and self.current_character in DIGITS + '.':
+    while self.current_character is not None and self.current_character in DIGITS + '.':
       if self.current_character == '.':
         if dot_count == 1: break
         dot_count += 1
@@ -128,14 +128,11 @@ class Lexer:
       't': '\t'
     }
 
-    while self.current_character != None and (self.current_character != '"' or escape_character):
+    while self.current_character is not None and (self.current_character != '"' or escape_character):
       if escape_character:
         string += escape_characters.get(self.current_character, self.current_character)
-      else:
-        if self.current_character == '\\':
-          escape_character = True
-        else:
-          string += self.current_character
+      elif self.current_character != '\\':
+        string += self.current_character
       self.advance()
       escape_character = False
 
@@ -146,7 +143,7 @@ class Lexer:
     identifier_string = ''
     position_start = self.position.copy()
 
-    while self.current_character != None and self.current_character in LETTERS_AND_DIGITS + '_':
+    while self.current_character is not None and self.current_character in LETTERS_AND_DIGITS + '_':
       identifier_string += self.current_character
       self.advance()
 
@@ -212,7 +209,7 @@ class Lexer:
 
     nesting_level = 1
 
-    while self.current_character != None and nesting_level > 0:
+    while self.current_character is not None and nesting_level > 0:
       # Check for nested block comment start
       if self.current_character == '/' and self.check_next_character('*'):
         self.advance()  # Skip /
@@ -236,7 +233,7 @@ class Lexer:
   def skip_double_slash_comment(self):
     self.advance()
     self.advance()
-    while self.current_character != None:
+    while self.current_character is not None:
         if self.current_character == '\n':
           self.advance()
           break

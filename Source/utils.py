@@ -11,7 +11,7 @@ def string_with_arrows(text, position_start, position_end):
 	# Generate each line
 	line_count = position_end.line_number - position_start.line_number + 1
 	for i in range(line_count):
-		# Calculate line columnumns
+		# Calculate line columns
 		line = text[index_start:index_end]
 		column_start = position_start.column if i == 0 else 0
 		column_end = position_end.column if i == line_count - 1 else len(line) - 1
@@ -28,8 +28,8 @@ def string_with_arrows(text, position_start, position_end):
 	return result.replace('\t', '')
 
 def suggest_keyword(identifier):
-    # Simple suggestion: return the first keyword with distance 1
-    for keyword in KEYWORDS:
-        if len(identifier) == len(keyword) and sum(a != b for a, b in zip(identifier, keyword)) == 1:
-            return keyword
-    return None
+	# Simple suggestion: return the first keyword with distance 1
+	for keyword in KEYWORDS:
+		if len(identifier) == len(keyword) and sum(a != b for a, b in zip(identifier, keyword)) == 1:
+			return keyword
+	return None

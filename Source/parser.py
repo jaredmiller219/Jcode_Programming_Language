@@ -25,7 +25,7 @@ class Parser:
     return self.current_token
 
   def update_current_token(self):
-    if self.token_index >= 0 and self.token_index < len(self.tokens):
+    if 0 <= self.token_index < len(self.tokens):
       self.current_token = self.tokens[self.token_index]
 
   def peek_next_token(self):
@@ -502,7 +502,7 @@ class Parser:
   def if_expr_cases(self, case_keyword):
     parseResult = ParseResult()
     cases = []
-    else_case = None
+    # else_case = None
 
     if not self.current_token.matches(TT_KEYWORD, case_keyword):
       return parseResult.failure(InvalidSyntaxError(
@@ -901,8 +901,7 @@ class Parser:
   ###################################
 
   def binary_operation(self, func_a, operations, func_b=None):
-    if func_b == None:
-      func_b = func_a
+    if func_b is None: func_b = func_a
 
     parseResult = ParseResult()
     left = parseResult.register(func_a())

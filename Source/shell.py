@@ -58,7 +58,7 @@ def is_assignment(text):
     return text.strip().lower().startswith("var ")
 
 
-def is_falsey_literal(text):
+def is_falsy_literal(text):
     """
     Returns True if the user input is "0" or "false" (case-insensitive).
 
@@ -167,7 +167,7 @@ def run_shell(shell_state):
             if is_clear_command(text):
                 clear_screen()
                 continue
-            if is_falsey_literal(text):
+            if is_falsy_literal(text):
                 print(0)
                 continue
             if is_exit_command(text):

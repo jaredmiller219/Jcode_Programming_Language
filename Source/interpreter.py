@@ -269,7 +269,7 @@ class Interpreter:
     if isinstance(value_to_call, BuiltInFunction):
         return_value = runtimeResult.register(value_to_call.execute(node, arguments, node.position_start))
     else:
-        return_value = runtimeResult.register(value_to_call.execute(arguments, node.position_start))
+        return_value = runtimeResult.register(value_to_call.execute(None, arguments, node.position_start))
 
     # return_value = runtimeResult.register(value_to_call.execute(node, arguments, node.position_start))
     if runtimeResult.should_return(): return runtimeResult
@@ -322,7 +322,7 @@ class Interpreter:
           ))
         result = String(list_or_string.value[idx])
         error = None
-      except:
+      except ValueError:
         return runtimeResult.failure(RuntimeError(
           node.position_start, node.position_end,
           f"Index must be an integer",
