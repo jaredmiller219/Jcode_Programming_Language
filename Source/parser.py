@@ -298,83 +298,90 @@ class Parser:
         if self.current_token.type != TT_RIGHT_PAREN:
           return parseResult.failure(InvalidSyntaxError(
             self.current_token.position_start, self.current_token.position_end,
-            f"Expected ',' or ')'"
+            "Expected ',' or ')'"
           ))
 
         parseResult.register_advancement()
         self.advance()
       return parseResult.success(CallNode(atomic, argument_nodes))
+
+    # Handle indexing with square brackets
+    elif self.current_token.type == TT_LEFT_SQUARE:
+      parseResult.register_advancement()
+      self.advance()
+
+      index = parseResult.register(self.expression())
+      if parseResult.error: return parseResult
+
+      if self.current_token.type != TT_RIGHT_SQUARE:
+        return parseResult.failure(InvalidSyntaxError(
+          self.current_token.position_start, self.current_token.position_end,
+          "Expected ']'"
+        ))
+
+      parseResult.register_advancement()
+      self.advance()
+
+      # Create an IndexNode instead of a BinOpNode
+      return parseResult.success(IndexNode(
+        atomic,
+        index,
+        atomic.position_start,
+        self.current_token.position_end.copy()
+      ))
+
     return parseResult.success(atomic)
 
   def atomic(self):
     parseResult = ParseResult()
-    parseResult.current_token = self.current_token
-    token= self.current_token
+    token = self.current_token
 
     if token.type in (TT_INT, TT_FLOAT):
-        parseResult.register_advancement()
-        self.advance()
-        return parseResult.success(NumberNode(token))
-
+      parseResult.register_advancement()
+      self.advance()
+      return parseResult.success(NumberNode(token))
     elif token.type == TT_STRING:
-        parseResult.register_advancement()
-        self.advance()
-        return parseResult.success(StringNode(token))
-
+      parseResult.register_advancement()
+      self.advance()
+      return parseResult.success(StringNode(token))
     elif token.type == TT_IDENTIFIER:
-        # parseResult.register_advancement()
-        # self.advance()
-        # return parseResult.success(VarAccessNode(token))
-        suggestion = suggest_keyword(token.value)
-        if suggestion:
-            return parseResult.failure(InvalidSyntaxError(
-                token.position_start, token.position_end,
-                f"Unexpected identifier '{token.value}'. Did you mean '{suggestion}'?"
-            ))
-        parseResult.register_advancement()
-        self.advance()
-        return parseResult.success(VarAccessNode(token))
-
+      parseResult.register_advancement()
+      self.advance()
+      return parseResult.success(VarAccessNode(token))
     elif token.type == TT_LEFT_PAREN:
+      parseResult.register_advancement()
+      self.advance()
+      expression = parseResult.register(self.expression())
+      if parseResult.error: return parseResult
+      if self.current_token.type == TT_RIGHT_PAREN:
         parseResult.register_advancement()
         self.advance()
-        expression = parseResult.register(self.expression())
-        if parseResult.error: return parseResult
-        if self.current_token.type == TT_RPAREN:
-            parseResult.register_advancement()
-            self.advance()
-            return parseResult.success(expression)
-        else:
-            return parseResult.failure(InvalidSyntaxError(
-                self.current_token.position_start, self.current_token.position_end,
-                "Expected ')'"
-            ))
-
+        return parseResult.success(expression)
+      else:
+        return parseResult.failure(InvalidSyntaxError(
+          self.current_token.position_start, self.current_token.position_end,
+          "Expected ')'"
+        ))
     elif token.type == TT_LEFT_SQUARE:
       list_expression = parseResult.register(self.list_expression())
       if parseResult.error: return parseResult
       return parseResult.success(list_expression)
-
     elif token.matches(TT_KEYWORD, 'if'):
       if_expression = parseResult.register(self.if_expression())
       if parseResult.error: return parseResult
       return parseResult.success(if_expression)
-
     elif token.matches(TT_KEYWORD, 'for'):
       for_expression = parseResult.register(self.for_expression())
       if parseResult.error: return parseResult
       return parseResult.success(for_expression)
-
     elif token.matches(TT_KEYWORD, 'while'):
       while_expression = parseResult.register(self.while_expression())
       if parseResult.error: return parseResult
       return parseResult.success(while_expression)
-
     elif token.matches(TT_KEYWORD, 'func'):
       function_definition = parseResult.register(self.function_definition())
       if parseResult.error: return parseResult
       return parseResult.success(function_definition)
-
     return parseResult.failure(InvalidSyntaxError(
         token.position_start, token.position_end,
         "Expected int, float, identifier, '+', '-', '(', '[', if', 'for', 'while', 'func'"

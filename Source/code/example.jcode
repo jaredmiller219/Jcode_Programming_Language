@@ -9,7 +9,7 @@ func join(list elements, string separator){
     int x = 2
 
     for i = 0 to len {
-        var result: result + elements/i
+        var result: result + elements[i]
         if i != len - 1:
 			var result: result + separator
             print(x)
@@ -22,7 +22,7 @@ func map(list elements, function fn){
     var new_elements: []
 
     for i = 0 to len(elements){
-        append(new_elements, fn(elements/i))
+        append(new_elements, fn(elements[i]))
     }
 
     return new_elements

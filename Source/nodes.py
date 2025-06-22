@@ -133,3 +133,10 @@ class BreakNode:
   def __init__(self, position_start, position_end):
     self.position_start = position_start
     self.position_end = position_end
+
+class IndexNode:
+  def __init__(self, list_or_string_node, index_node, position_start, position_end):
+    self.list_or_string_node = list_or_string_node
+    self.index_node = index_node
+    self.position_start = position_start
+    self.position_end = position_end

@@ -104,46 +104,45 @@ class Interpreter:
 
   def visit_BinaryOperationNode(self, node, context):
     runtimeResult = RuntimeResult()
-
-    error = None
-    runtimeResult = RuntimeResult()
-
     left = runtimeResult.register(self.visit(node.left_node, context))
     if runtimeResult.should_return(): return runtimeResult
     right = runtimeResult.register(self.visit(node.right_node, context))
     if runtimeResult.should_return(): return runtimeResult
 
     if node.operation_token.type == TT_PLUS:
-      runtimeResultult, error = left.added_to(right)
+      result, error = left.added_to(right)
     elif node.operation_token.type == TT_MINUS:
-      runtimeResultult, error = left.subtracted_by(right)
+      result, error = left.subtracted_by(right)
     elif node.operation_token.type == TT_MULTIPLY:
-      runtimeResultult, error = left.multiplied_by(right)
+      result, error = left.multiplied_by(right)
     elif node.operation_token.type == TT_DIVIDE:
-      runtimeResultult, error = left.divided_by(right)
+      # This is now used for both division and indexing
+      # If left is a List, this is indexing
+      # Otherwise, it's division
+      result, error = left.divided_by(right)
     elif node.operation_token.type == TT_POWER:
-      runtimeResultult, error = left.powered_by(right)
+      result, error = left.powered_by(right)
     elif node.operation_token.type == TT_EQUAL_EQUAL:
-      runtimeResultult, error = left.equals(right)
+      result, error = left.equals(right)
     elif node.operation_token.type == TT_NOT_EQUAL:
-      runtimeResultult, error = left.not_equals(right)
+      result, error = left.not_equals(right)
     elif node.operation_token.type == TT_LESS_THAN:
-      runtimeResultult, error = left.less_than(right)
+      result, error = left.less_than(right)
     elif node.operation_token.type == TT_GREATER_THAN:
-      runtimeResultult, error = left.greater_than(right)
+      result, error = left.greater_than(right)
     elif node.operation_token.type == TT_LESS_THAN_EQUAL:
-      runtimeResultult, error = left.less_than_or_equal_to(right)
+      result, error = left.less_than_or_equal_to(right)
     elif node.operation_token.type == TT_GREATER_THAN_EQUAL:
-      runtimeResultult, error = left.greater_than_or_equal_to(right)
+      result, error = left.greater_than_or_equal_to(right)
     elif node.operation_token.matches(TT_KEYWORD, 'and'):
-      runtimeResultult, error = left.anded_by(right)
+      result, error = left.anded_by(right)
     elif node.operation_token.matches(TT_KEYWORD, 'or'):
-      runtimeResultult, error = left.ored_by(right)
+      result, error = left.ored_by(right)
 
     if error:
       return runtimeResult.failure(error)
     else:
-      return runtimeResult.success(runtimeResultult.set_position(node.position_start, node.position_end))
+      return runtimeResult.success(result.set_position(node.position_start, node.position_end))
 
   def visit_UnaryOpNode(self, node, context):
     runtimeResult = RuntimeResult()
@@ -295,3 +294,48 @@ class Interpreter:
   def visit_BreakNode(self, node, context):
     _ = node, context
     return RuntimeResult().success_break()
+
+  def visit_IndexNode(self, node, context):
+    runtimeResult = RuntimeResult()
+
+    # Get the list/string to index into
+    list_or_string = runtimeResult.register(self.visit(node.list_or_string_node, context))
+    if runtimeResult.should_return(): return runtimeResult
+
+    # Get the index
+    index = runtimeResult.register(self.visit(node.index_node, context))
+    if runtimeResult.should_return(): return runtimeResult
+
+    # Perform the indexing operation
+    if isinstance(list_or_string, List):
+      # For lists, use the divided_by method which already handles indexing
+      result, error = list_or_string.divided_by(index)
+    elif isinstance(list_or_string, String):
+      # For strings, implement indexing
+      try:
+        idx = int(index.value)
+        if idx < 0 or idx >= len(list_or_string.value):
+          return runtimeResult.failure(RuntimeError(
+            node.position_start, node.position_end,
+            f"Index {idx} out of range for string of length {len(list_or_string.value)}",
+            context
+          ))
+        result = String(list_or_string.value[idx])
+        error = None
+      except:
+        return runtimeResult.failure(RuntimeError(
+          node.position_start, node.position_end,
+          f"Index must be an integer",
+          context
+        ))
+    else:
+      return runtimeResult.failure(RuntimeError(
+        node.position_start, node.position_end,
+        f"Cannot index into {type(list_or_string).__name__}",
+        context
+      ))
+
+    if error:
+      return runtimeResult.failure(error)
+    else:
+      return runtimeResult.success(result.set_position(node.position_start, node.position_end))
