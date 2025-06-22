@@ -254,7 +254,7 @@ class List(Value):
       try:
         new_list.elements.pop(other_number.value)
         return new_list, None
-      except:
+      except IndexError:
         return None, RuntimeError(
           other_number.position_start, other_number.position_end,
           'Element at this index could not be removed from list because index is out of bounds',
@@ -275,7 +275,7 @@ class List(Value):
     if isinstance(other_number, Number):
       try:
         return self.elements[other_number.value], None
-      except:
+      except IndexError:
         return None, RuntimeError(
           other_number.position_start, other_number.position_end,
           'Element at this index could not be retrieved from list because index is out of bounds',
@@ -386,7 +386,7 @@ class Function(BaseFunction):
     return f"<function {self.name}>"
 
 
-def argnames(*names):
+def argument_names(*names):
     def wrapper(function):
         function.argument_names = list(names)
         return function
@@ -446,25 +446,25 @@ class BuiltInFunction(BaseFunction):
     return f"<built-in function {self.name}>"
 
   #####################################
-  @argnames('value')
+  @argument_names('value')
   def execute_print(self, execution_context):
     print(str(execution_context.symbol_table.get('value')))
     return RuntimeResult().success(Number.null)
     #execute_print.argument_names = ['value']
 
-  @argnames('value')
+  @argument_names('value')
   def execute_print_ret(self, execution_context):
     return RuntimeResult().success(String(str(execution_context.symbol_table.get('value'))))
   #execute_print_ret.argument_names = ['value']
 
-  @argnames()
+  @argument_names()
   def execute_input(self, execution_context):
     _ = execution_context
     text = input()
     return RuntimeResult().success(String(text))
   #execute_input.argument_names = []
 
-  @argnames()
+  @argument_names()
   def execute_input_int(self, execution_context):
     _ = execution_context
     while True:
@@ -477,38 +477,38 @@ class BuiltInFunction(BaseFunction):
     return RuntimeResult().success(Number(number))
   #execute_input_int.argument_names = []
 
-  @argnames()
+  @argument_names()
   def execute_clear(self, execution_context):
     _ = execution_context
     os.system('cls' if os.name == 'nt' else 'clear')
     return RuntimeResult().success(Number.null)
   #execute_clear.argument_names = []
 
-  @argnames('value')
+  @argument_names('value')
   def execute_is_number(self, execution_context):
     is_number = isinstance(execution_context.symbol_table.get("value"), Number)
     return RuntimeResult().success(Number.true if is_number else Number.false)
   #execute_is_number.argument_names = ["value"]
 
-  @argnames('value')
+  @argument_names('value')
   def execute_is_string(self, execution_context):
     is_number = isinstance(execution_context.symbol_table.get("value"), String)
     return RuntimeResult().success(Number.true if is_number else Number.false)
   #execute_is_string.argument_names = ["value"]
 
-  @argnames('value')
+  @argument_names('value')
   def execute_is_list(self, execution_context):
     is_number = isinstance(execution_context.symbol_table.get("value"), List)
     return RuntimeResult().success(Number.true if is_number else Number.false)
   #execute_is_list.argument_names = ["value"]
 
-  @argnames('value')
+  @argument_names('value')
   def execute_is_function(self, execution_context):
     is_number = isinstance(execution_context.symbol_table.get("value"), BaseFunction)
     return RuntimeResult().success(Number.true if is_number else Number.false)
   #execute_is_function.argument_names = ["value"]
 
-  @argnames('list', 'value')
+  @argument_names('list', 'value')
   def execute_append(self, execution_context):
     list_ = execution_context.symbol_table.get("list")
     value = execution_context.symbol_table.get("value")
@@ -524,7 +524,7 @@ class BuiltInFunction(BaseFunction):
     return RuntimeResult().success(Number.null)
   #execute_append.argument_names = ["list", "value"]
 
-  @argnames('list', 'index')
+  @argument_names('list', 'index')
   def execute_pop(self, execution_context):
     list_ = execution_context.symbol_table.get("list")
     index = execution_context.symbol_table.get("index")
@@ -545,7 +545,7 @@ class BuiltInFunction(BaseFunction):
 
     try:
       element = list_.elements.pop(index.value)
-    except:
+    except IndexError:
       return RuntimeResult().failure(RuntimeError(
         self.position_start, self.position_end,
         'Element at this index could not be removed from list because index is out of bounds',
@@ -554,7 +554,7 @@ class BuiltInFunction(BaseFunction):
     return RuntimeResult().success(element)
   #execute_pop.argument_names = ["list", "index"]
 
-  @argnames('listA', 'listB')
+  @argument_names('listA', 'listB')
   def execute_extend(self, execution_context):
     listA = execution_context.symbol_table.get("listA")
     listB = execution_context.symbol_table.get("listB")
@@ -577,7 +577,7 @@ class BuiltInFunction(BaseFunction):
     return RuntimeResult().success(Number.null)
   #execute_extend.argument_names = ["listA", "listB"]
 
-  @argnames('list')
+  @argument_names('list')
   def execute_len(self, execution_context):
     list_ = execution_context.symbol_table.get("list")
 
@@ -591,7 +591,7 @@ class BuiltInFunction(BaseFunction):
     return RuntimeResult().success(Number(len(list_.elements)))
   #execute_len.argument_names = ["list"]
 
-  @argnames('function')
+  @argument_names('function')
   def execute_run(self, execution_context):
     from main import run
     function = execution_context.symbol_table.get("function")
