@@ -68,8 +68,8 @@ class Value:
   def notted(self, other_number):
     return None, self.illegal_operation(other_number)
 
-  def execute(self, arguments):
-    _ = arguments
+  def execute(self, node, arguments, position):
+    _ = node, arguments, position
     return RuntimeResult().failure(self.illegal_operation())
 
   def copy(self):
@@ -181,7 +181,8 @@ class Number(Value):
     else:
       return None, Value.illegal_operation(self, other_number)
 
-  def notted(self):
+  def notted(self, other_number):
+    _ = other_number
     if self.value == 0: return Number(1).set_context(self.context), None
     else: return Number(0).set_context(self.context), None
 
@@ -355,8 +356,9 @@ class Function(BaseFunction):
     self.argument_names = argument_names
     self.should_auto_return = should_auto_return
 
-  def execute(self, arguments, position_start):
+  def execute(self, node, arguments, position_start):
     from interpreter import Interpreter
+    _ = node
     runtimeResult = RuntimeResult()
     interpreter = Interpreter()
     execution_context = self.generate_new_context(position_start)
@@ -365,7 +367,7 @@ class Function(BaseFunction):
     if runtimeResult.should_return(): return runtimeResult
 
     value = runtimeResult.register(interpreter.visit(self.body_node, execution_context))
-    if runtimeResult.should_return() and runtimeResult.function_return_value == None: return runtimeResult
+    if runtimeResult.should_return() and runtimeResult.function_return_value is None: return runtimeResult
 
     if self.should_auto_return: return_value = value
     elif runtimeResult.function_return_value is not None:
