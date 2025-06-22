@@ -28,6 +28,7 @@ TT_LESS_THAN_EQUAL      = 'LESS_THAN_EQUAL'
 TT_GREATER_THAN_EQUAL   = 'GREATER_THAN_EQUAL'
 TT_COMMA		            = 'COMMA'
 TT_ARROW		            = 'ARROW'
+TT_ASSIGN               = 'ASSIGN'
 TT_NEWLINE		          = 'NEWLINE'
 TT_END_OF_FILE			    = 'END_OF_FILE'
 

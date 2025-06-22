@@ -4,20 +4,20 @@
 func oopify(prefix) => prefix + "oop"
 
 func join(elements, separator){
-    var result = ""
-    var len = len(elements)
+    var result: ""
+    var len: len(elements)
 
     for i = 0 to len:
-        var result = result + elements/i
+        var result: result + elements/i
         if i != len - 1:
-			var result = result + separator
+			var result: result + separator
     end
 
     return result
 }
 
 func map(elements, fn){
-    var new_elements = []
+    var new_elements: []
 
     for i = 0 to len(elements):
         append(new_elements, fn(elements/i))

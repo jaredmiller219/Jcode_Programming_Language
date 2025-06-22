@@ -152,10 +152,21 @@ class Parser:
       parseResult.register_advancement()
       self.advance()
 
+      # Handle assignment with either equals sign or colon
+      if self.current_token.type == TT_COLON:
+        parseResult.register_advancement()
+        self.advance()
+
+        # This is the key change - we're treating the colon as an assignment operator
+        # and immediately expecting an expression after it
+        expression = parseResult.register(self.expression())
+        if parseResult.error: return parseResult
+        return parseResult.success(VarAssignNode(variable_name, expression))
+
       if self.current_token.type != TT_EQUAL:
         return parseResult.failure(InvalidSyntaxError(
           self.current_token.position_start, self.current_token.position_end,
-          "Expected '='"
+          "Expected '=' or ':'"
         ))
 
       parseResult.register_advancement()
