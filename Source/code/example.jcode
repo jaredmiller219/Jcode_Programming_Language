@@ -1,7 +1,7 @@
 # This is a very useful piece of software
 
 # functions
-func oopify(string prefix) => prefix + "oop"
+func oopify(string prefix) return prefix + "oop"
 
 func join(list elements, string separator){
     string result: ""

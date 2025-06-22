@@ -717,6 +717,7 @@ class Parser:
               f"Expected 'func'"
           ))
 
+      func_pos_start = self.current_token.position_start  # Store function start position
       parseResult.register_advancement()
       self.advance()
 
@@ -742,60 +743,18 @@ class Parser:
       argument_name_tokens = []
       argument_type_tokens = []
 
-      # Check if we have parameters (non-empty parameter list)
+      # Check if we have parameters
       if self.current_token.type != TT_RIGHT_PAREN:
-          # First parameter - check if it's a type
-          current_token = self.current_token  # Store the current token
-
+          # First parameter
           # Check if this is a type identifier
-          is_type = (current_token.type == TT_IDENTIFIER and
-                     current_token.value in ['int', 'float', 'string', 'list', 'function'])
-
-          if not is_type:
-              # Create a direct error with the current token's position
-              error = InvalidSyntaxError(
-                  current_token.position_start, current_token.position_end,
-                  f"Missing type for parameter '{current_token.value}'. Expected type identifier (int, float, string, list, function)"
-              )
-              # Return the error immediately
-              return parseResult.failure(error)
-
-          # This is a type identifier
-          type_token = self.current_token
-          parseResult.register_advancement()
-          self.advance()
-
-          if self.current_token.type != TT_IDENTIFIER:
-              return parseResult.failure(InvalidSyntaxError(
-                  self.current_token.position_start, self.current_token.position_end,
-                  f"Expected parameter name"
-              ))
-
-          argument_name_token = self.current_token
-          argument_type_tokens.append(type_token)
-          argument_name_tokens.append(argument_name_token)
-          parseResult.register_advancement()
-          self.advance()
-
-          # Additional parameters
-          while self.current_token.type == TT_COMMA:
-              parseResult.register_advancement()
-              self.advance()
-
-              # Store the current token position for potential error reporting
-              param_pos_start = self.current_token.position_start
-              param_pos_end = self.current_token.position_end
-              param_value = self.current_token.value
-
-              # Check if next token is a type
-              is_type = (self.current_token.type == TT_IDENTIFIER and
-                         self.current_token.value in ['int', 'float', 'string', 'list', 'function'])
+          if self.current_token.type == TT_IDENTIFIER:
+              is_type = self.current_token.value in ['int', 'float', 'string', 'list', 'function']
 
               if not is_type:
-                  # Error: Parameter must have a type - point to the parameter
+                  # Error: Parameter must have a type
                   return parseResult.failure(InvalidSyntaxError(
-                      param_pos_start, param_pos_end,
-                      f"Missing type for parameter '{param_value}'. Expected type identifier (int, float, string, list, function)"
+                      self.current_token.position_start, self.current_token.position_end,
+                      f"Missing type for parameter '{self.current_token.value}'. Expected type identifier (int, float, string, list, function)"
                   ))
 
               # This is a type identifier
@@ -814,26 +773,68 @@ class Parser:
               argument_name_tokens.append(argument_name_token)
               parseResult.register_advancement()
               self.advance()
+          else:
+              return parseResult.failure(InvalidSyntaxError(
+                  self.current_token.position_start, self.current_token.position_end,
+                  f"Expected type identifier (int, float, string, list, function)"
+              ))
+
+          # Additional parameters
+          while self.current_token.type == TT_COMMA:
+              parseResult.register_advancement()
+              self.advance()
+
+              # Check if next token is a type
+              if self.current_token.type == TT_IDENTIFIER:
+                  is_type = self.current_token.value in ['int', 'float', 'string', 'list', 'function']
+
+                  if not is_type:
+                      # Error: Parameter must have a type
+                      return parseResult.failure(InvalidSyntaxError(
+                          self.current_token.position_start, self.current_token.position_end,
+                          f"Missing type for parameter '{self.current_token.value}'. Expected type identifier (int, float, string, list, function)"
+                      ))
+
+                  # This is a type identifier
+                  type_token = self.current_token
+                  parseResult.register_advancement()
+                  self.advance()
+
+                  if self.current_token.type != TT_IDENTIFIER:
+                      return parseResult.failure(InvalidSyntaxError(
+                          self.current_token.position_start, self.current_token.position_end,
+                          f"Expected parameter name"
+                      ))
+
+                  argument_name_token = self.current_token
+                  argument_type_tokens.append(type_token)
+                  argument_name_tokens.append(argument_name_token)
+                  parseResult.register_advancement()
+                  self.advance()
+              else:
+                  return parseResult.failure(InvalidSyntaxError(
+                      self.current_token.position_start, self.current_token.position_end,
+                      f"Expected type identifier (int, float, string, list, function)"
+                  ))
+
 
       if self.current_token.type != TT_RIGHT_PAREN:
           return parseResult.failure(InvalidSyntaxError(
               self.current_token.position_start, self.current_token.position_end,
-              f"Expected ',' or ')'"
+              f"Expected ')', ',' or identifier"
           ))
 
       parseResult.register_advancement()
       self.advance()
 
-      # Handle arrow-style single-expression function
+      # Check for arrow syntax (=>)
       if self.current_token.type == TT_ARROW:
           parseResult.register_advancement()
           self.advance()
 
           body = parseResult.register(self.expression())
           if parseResult.error:
-              return parseResult.failure(InvalidSyntaxError(
-                  parseResult.error.position_start, parseResult.error.position_end, parseResult.error.details
-              ))
+              return parseResult
 
           return parseResult.success(FuncDefNode(
               variable_name_token,
@@ -843,26 +844,61 @@ class Parser:
               argument_type_tokens
           ))
 
-      # MULTI-STATEMENT FUNCTION STARTS HERE
-      # Accept either NEWLINE or LEFT_BRACE after parameter list
-      if self.current_token.type == TT_NEWLINE:
+      # Check for one-line return syntax
+      elif self.current_token.matches(TT_KEYWORD, 'return'):
+          return_pos_start = self.current_token.position_start
           parseResult.register_advancement()
           self.advance()
+
+          expr = parseResult.register(self.expression())
+          if parseResult.error:
+              return parseResult
+
+          expr_pos_end = expr.position_end if hasattr(expr, 'position_end') else self.current_token.position_end
+
+          # Create a ReturnNode with proper positions
+          return_node = ReturnNode(expr, return_pos_start, expr_pos_end)
+
+          # Create a ListNode with proper positions
+          body_node = ListNode(
+              [return_node],
+              func_pos_start,  # Use the function's start position
+              expr_pos_end     # Use the expression's end position
+          )
+
+          return parseResult.success(FuncDefNode(
+              variable_name_token,
+              argument_name_tokens,
+              body_node,
+              False,  # Not auto-return since we're explicitly returning
+              argument_type_tokens
+          ))
+
+      # Multi-line function body
+      elif self.current_token.type == TT_LEFT_BRACE or self.current_token.type == TT_COLON:
+          parseResult.register_advancement()
+          self.advance()
+
+          # Check if we need a newline after colon
+          if self.current_token.type == TT_NEWLINE:
+              parseResult.register_advancement()
+              self.advance()
 
           body = parseResult.register(self.statements())
           if parseResult.error:
-              return parseResult.failure(InvalidSyntaxError(
-                  parseResult.error.position_start, parseResult.error.position_end, parseResult.error.details
-              ))
+              return parseResult
 
-          if not self.current_token.matches(TT_KEYWORD, 'end'):
+          if self.current_token.type == TT_RIGHT_BRACE:
+              parseResult.register_advancement()
+              self.advance()
+          elif self.current_token.matches(TT_KEYWORD, 'end'):
+              parseResult.register_advancement()
+              self.advance()
+          else:
               return parseResult.failure(InvalidSyntaxError(
                   self.current_token.position_start, self.current_token.position_end,
-                  f"Expected 'end'"
+                  f"Expected '}}' or 'end'"
               ))
-
-          parseResult.register_advancement()
-          self.advance()
 
           return parseResult.success(FuncDefNode(
               variable_name_token,
@@ -872,37 +908,11 @@ class Parser:
               argument_type_tokens
           ))
 
-      elif self.current_token.type == TT_LEFT_BRACE:
-          parseResult.register_advancement()
-          self.advance()
-
-          body = parseResult.register(self.statements())
-          if parseResult.error:
-              return parseResult.failure(InvalidSyntaxError(
-                  parseResult.error.position_start, parseResult.error.position_end, parseResult.error.details
-              ))
-
-          if self.current_token.type != TT_RIGHT_BRACE:
-              return parseResult.failure(InvalidSyntaxError(
-                  self.current_token.position_start, self.current_token.position_end,
-                  f"Expected '}}'"
-              ))
-
-          parseResult.register_advancement()
-          self.advance()
-
-          return parseResult.success(FuncDefNode(
-              variable_name_token,
-              argument_name_tokens,
-              body,
-              False,
-              argument_type_tokens
+      else:
+          return parseResult.failure(InvalidSyntaxError(
+              self.current_token.position_start, self.current_token.position_end,
+              f"Expected '=>', 'return', ':' or '{{'"
           ))
-
-      return parseResult.failure(InvalidSyntaxError(
-          self.current_token.position_start, self.current_token.position_end,
-          f"Expected '=>', '{{', or NEWLINE"
-      ))
 
   ###################################
 
