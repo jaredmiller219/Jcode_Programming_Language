@@ -4,7 +4,7 @@
 func oopify(string prefix) => prefix + "oop"
 
 func join(list elements, string separator){
-    var result: ""
+    int result: ""
     var len: len(elements)
 
     for i = 0 to len {

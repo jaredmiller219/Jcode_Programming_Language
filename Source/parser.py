@@ -173,6 +173,8 @@ class Parser:
 
       expression = parseResult.register(self.expression())
       if parseResult.error: return parseResult
+
+      # Store the type information in the VarAssignNode
       return parseResult.success(VarAssignNode(variable_name, expression, type_token))
 
     # Original var keyword handling

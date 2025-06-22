@@ -63,6 +63,42 @@ class Interpreter:
     variable_value = runtimeResult.register(self.visit(node.value_node, context))
     if runtimeResult.should_return(): return runtimeResult
 
+    # Type checking if a type was specified
+    if node.type_token:
+      type_name = node.type_token.value
+
+      # Check if the value matches the declared type
+      if type_name == 'int' and not isinstance(variable_value, Number) or (isinstance(variable_value, Number) and not isinstance(variable_value.value, int)):
+        return runtimeResult.failure(RuntimeError(
+          node.position_start, node.position_end,
+          f"Type mismatch: Expected 'int', got '{type(variable_value).__name__}'",
+          context
+        ))
+      elif type_name == 'float' and not isinstance(variable_value, Number):
+        return runtimeResult.failure(RuntimeError(
+          node.position_start, node.position_end,
+          f"Type mismatch: Expected 'float', got '{type(variable_value).__name__}'",
+          context
+        ))
+      elif type_name == 'string' and not isinstance(variable_value, String):
+        return runtimeResult.failure(RuntimeError(
+          node.position_start, node.position_end,
+          f"Type mismatch: Expected 'string', got '{type(variable_value).__name__}'",
+          context
+        ))
+      elif type_name == 'list' and not isinstance(variable_value, List):
+        return runtimeResult.failure(RuntimeError(
+          node.position_start, node.position_end,
+          f"Type mismatch: Expected 'list', got '{type(variable_value).__name__}'",
+          context
+        ))
+      elif type_name == 'function' and not isinstance(variable_value, BaseFunction):
+        return runtimeResult.failure(RuntimeError(
+          node.position_start, node.position_end,
+          f"Type mismatch: Expected 'function', got '{type(variable_value).__name__}'",
+          context
+        ))
+
     context.symbol_table.set(variable_name, variable_value)
     return runtimeResult.success(variable_value)
 
