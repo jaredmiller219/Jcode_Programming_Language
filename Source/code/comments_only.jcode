@@ -1,0 +1,16 @@
+// This file contains only comments
+// It should parse without errors
+
+/*
+ * This is a block comment
+ * It spans multiple lines
+ * But there's no actual code here
+ */
+
+# Another comment style
+# Just to be thorough
+
+/*
+ * The parser should handle this file gracefully
+ * without producing any errors
+ */

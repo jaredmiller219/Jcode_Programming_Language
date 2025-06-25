@@ -18,7 +18,13 @@ def string_with_arrows(text, position_start, position_end):
 
 		# Append to result
 		result += line + '\n'
-		result += ' ' * column_start + '^' * (column_end - column_start)
+
+		# For function definition spacing errors, make the arrow more visible
+		if "blank line after" in result and "function" in result:
+			# Point to the end of the line with a clear marker
+			result += ' ' * max(0, len(line) - 1) + '↑ Add blank line here\n'
+		else:
+			result += ' ' * column_start + '^' * max(1, column_end - column_start)
 
 		# Re-calculate indices
 		index_start = index_end

@@ -37,6 +37,8 @@ class Parser:
 
   def parse(self):
     parseResult = self.statements()
+
+    # If there's no error but we haven't reached EOF, there's an unexpected token
     if not parseResult.error and self.current_token.type != TT_END_OF_FILE:
       # Provide a more specific error message
       if self.current_token.type == TT_IDENTIFIER:
@@ -63,6 +65,7 @@ class Parser:
           self.current_token.position_start, self.current_token.position_end,
           f"Unexpected token '{self.current_token}'"
         ))
+
     return parseResult
 
   ###################################
@@ -72,22 +75,32 @@ class Parser:
     statements = []
     position_start = self.current_token.position_start.copy()
 
-    # Suggest keyword if identifier is close to a keyword
-    if self.current_token.type == TT_IDENTIFIER:
-        suggestion = suggest_keyword(self.current_token.value)
-        if suggestion:
-            return parseResult.failure(InvalidSyntaxError(
-                self.current_token.position_start, self.current_token.position_end,
-                f"Unexpected identifier '{self.current_token.value}'. Did you mean '{suggestion}'?"
-            ))
+    # Track the last statement type to enforce blank line rule
+    last_statement_was_func = False
+    last_func_end_position = None  # Store the end position of the last function
 
+    # Skip all newlines at the beginning
     while self.current_token.type == TT_NEWLINE:
       parseResult.register_advancement()
       self.advance()
 
+    # Check if we've reached the end of file (empty file or only comments)
+    if self.current_token.type == TT_END_OF_FILE:
+      return parseResult.success(ListNode(
+        statements,
+        position_start,
+        self.current_token.position_end.copy()
+      ))
+
     statement = parseResult.register(self.statement())
     if parseResult.error: return parseResult
     statements.append(statement)
+
+    # Check if this statement is a function definition
+    is_func_def = isinstance(statement, FuncDefNode)
+    last_statement_was_func = is_func_def
+    if is_func_def:
+      last_func_end_position = statement.position_end
 
     more_statements = True
 
@@ -97,16 +110,37 @@ class Parser:
         parseResult.register_advancement()
         self.advance()
         newline_count += 1
+
+      # If we've reached the end of file, break
+      if self.current_token.type == TT_END_OF_FILE:
+        break
+
+      # If the last statement was a function definition, enforce at least 2 newlines (1 blank line)
+      if last_statement_was_func and newline_count < 2:
+        # Use the end position of the last function instead of the current token position
+        return parseResult.failure(InvalidSyntaxError(
+          last_func_end_position, last_func_end_position,
+          "Expected at least one blank line after this function definition"
+        ))
+
       if newline_count == 0:
         more_statements = False
 
       if not more_statements: break
+
       statement = parseResult.try_register(self.statement())
       if not statement:
         self.reverse(parseResult.to_reverse_count)
         more_statements = False
         continue
+
       statements.append(statement)
+
+      # Update tracking of function definitions
+      is_func_def = isinstance(statement, FuncDefNode)
+      last_statement_was_func = is_func_def
+      if is_func_def:
+        last_func_end_position = statement.position_end
 
     return parseResult.success(ListNode(
       statements,

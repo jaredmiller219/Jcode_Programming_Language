@@ -7,7 +7,15 @@ statement	  : KEYWORD:RETURN expr?
 
 expr        : KEYWORD:VAR IDENTIFIER COLON expr
             : TYPE_IDENTIFIER IDENTIFIER (EQ|COLON) expr
+            : func-def
             : comp-expr ((KEYWORD:AND|KEYWORD:OR) comp-expr)*
+
+# Function definitions must be separated by at least one blank line
+func-def    : KEYWORD:FUNC IDENTIFIER?
+              LPAREN (param-def (COMMA param-def)*)? RPAREN
+              (ARROW expr)
+            | ((COLON|LBRACE) NEWLINE statements (KEYWORD:END|RBRACE))
+            : NEWLINE NEWLINE+  # At least one blank line after function definition
 
 comp-expr   : NOT comp-expr
             : arith-expr ((EE|LT|GT|LTE|GTE) arith-expr)*
@@ -54,11 +62,6 @@ for-expr    : KEYWORD:FOR IDENTIFIER EQ expr KEYWORD:TO expr
 while-expr  : KEYWORD:WHILE expr (COLON|LBRACE)
               statement
             | (NEWLINE statements (KEYWORD:END|RBRACE))
-
-func-def    : KEYWORD:FUNC IDENTIFIER?
-              LPAREN (param-def (COMMA param-def)*)? RPAREN
-              (ARROW expr)
-            | ((COLON|LBRACE) NEWLINE statements (KEYWORD:END|RBRACE))
 
 param-def   : TYPE_IDENTIFIER IDENTIFIER
 
