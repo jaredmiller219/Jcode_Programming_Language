@@ -7,7 +7,7 @@ func oopify(string prefix) return prefix + "oop"
  * join function
  * Joins a list of elements with a separator
  */
-func join(list elements, string separator){
+ func join(list elements, string separator){
     string result: ""
     var len: len(elements)
     int x = 2

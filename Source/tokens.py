@@ -31,6 +31,7 @@ TT_ARROW		            = 'ARROW'
 TT_ASSIGN               = 'ASSIGN'
 TT_NEWLINE		          = 'NEWLINE'
 TT_END_OF_FILE			    = 'END_OF_FILE'
+TT_NO_BLANK_LINE        = 'NO_BLANK_LINE'
 
 KEYWORDS = [
   'var',

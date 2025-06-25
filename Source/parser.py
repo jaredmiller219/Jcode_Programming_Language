@@ -38,6 +38,13 @@ class Parser:
   def parse(self):
     parseResult = self.statements()
 
+    # Check for the special NO_BLANK_LINE token
+    if not parseResult.error and self.current_token.type == TT_NO_BLANK_LINE:
+      return parseResult.failure(InvalidSyntaxError(
+        self.current_token.position_start, self.current_token.position_end,
+        "Expected at least one blank line after previous function definition"
+      ))
+
     # If there's no error but we haven't reached EOF, there's an unexpected token
     if not parseResult.error and self.current_token.type != TT_END_OF_FILE:
       # Provide a more specific error message
@@ -75,9 +82,9 @@ class Parser:
     statements = []
     position_start = self.current_token.position_start.copy()
 
-    # Track the last statement type to enforce blank line rule
-    last_statement_was_func = False
+    # Track function definitions
     last_func_end_position = None  # Store the end position of the last function
+    had_blank_line_after_func = True  # Initialize to True to avoid error at start
 
     # Skip all newlines at the beginning
     while self.current_token.type == TT_NEWLINE:
@@ -92,19 +99,20 @@ class Parser:
         self.current_token.position_end.copy()
       ))
 
+    # Process the first statement
     statement = parseResult.register(self.statement())
     if parseResult.error: return parseResult
     statements.append(statement)
 
     # Check if this statement is a function definition
-    is_func_def = isinstance(statement, FuncDefNode)
-    last_statement_was_func = is_func_def
-    if is_func_def:
+    if isinstance(statement, FuncDefNode):
       last_func_end_position = statement.position_end
+      had_blank_line_after_func = False  # Reset blank line flag after function
 
     more_statements = True
 
     while True:
+      # Count consecutive newlines
       newline_count = 0
       while self.current_token.type == TT_NEWLINE:
         parseResult.register_advancement()
@@ -115,9 +123,16 @@ class Parser:
       if self.current_token.type == TT_END_OF_FILE:
         break
 
-      # If the last statement was a function definition, enforce at least 2 newlines (1 blank line)
-      if last_statement_was_func and newline_count < 2:
-        # Use the end position of the last function instead of the current token position
+      # If we had 2 or more consecutive newlines, that's a blank line
+      if newline_count >= 2:
+        had_blank_line_after_func = True
+
+      # Check if we're about to process a function definition
+      is_next_func = self.current_token.type == TT_KEYWORD and self.current_token.value == 'func'
+
+      # If the last statement was a function and we're about to process another function,
+      # check if we had a blank line in between
+      if last_func_end_position and is_next_func and not had_blank_line_after_func:
         return parseResult.failure(InvalidSyntaxError(
           last_func_end_position, last_func_end_position,
           "Expected at least one blank line after this function definition"
@@ -128,6 +143,7 @@ class Parser:
 
       if not more_statements: break
 
+      # Process the next statement
       statement = parseResult.try_register(self.statement())
       if not statement:
         self.reverse(parseResult.to_reverse_count)
@@ -137,10 +153,9 @@ class Parser:
       statements.append(statement)
 
       # Update tracking of function definitions
-      is_func_def = isinstance(statement, FuncDefNode)
-      last_statement_was_func = is_func_def
-      if is_func_def:
+      if isinstance(statement, FuncDefNode):
         last_func_end_position = statement.position_end
+        had_blank_line_after_func = False  # Reset blank line flag after function
 
     return parseResult.success(ListNode(
       statements,

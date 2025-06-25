@@ -24,78 +24,102 @@ class Lexer:
   def Tokenize(self):
     tokens = []
 
+    # Track newlines for blank line detection
+    consecutive_newlines = 0
+    last_token_was_func = False
+    last_func_position = None
+
     while self.current_character is not None:
         if self.current_character in ' \t':
             self.advance()
         elif self.current_character == '#':
+            # Skip comment but don't reset consecutive_newlines
             self.skip_comment()
         elif self.current_character == '/' and self.check_next_character('/'):
+            # Skip comment but don't reset consecutive_newlines
             self.skip_double_slash_comment()
         elif self.current_character == '/' and self.check_next_character('*'):
+            # Skip comment but don't reset consecutive_newlines
             self.skip_block_comment()
         elif self.current_character in ';\n':
             tokens.append(Token(TT_NEWLINE, position_start=self.position))
             self.advance()
-        elif self.current_character in DIGITS:
-          tokens.append(self.digitize())
-        elif self.current_character in LETTERS:
-          tokens.append(self.identifize())
-        elif self.current_character == ':':
-          tokens.append(Token(TT_COLON, position_start=self.position))
-          self.advance()
-        elif self.current_character == '"':
-          tokens.append(self.stringify())
-        elif self.current_character == '+':
-          tokens.append(Token(TT_PLUS, position_start=self.position))
-          self.advance()
-        elif self.current_character == '-':
-          tokens.append(Token(TT_MINUS, position_start=self.position))
-          self.advance()
-        elif self.current_character == '*':
-          tokens.append(Token(TT_MULTIPLY, position_start=self.position))
-          self.advance()
-        elif self.current_character == '/':
-          tokens.append(Token(TT_DIVIDE, position_start=self.position))
-          self.advance()
-        elif self.current_character == '^':
-          tokens.append(Token(TT_POWER, position_start=self.position))
-          self.advance()
-        elif self.current_character == '(':
-          tokens.append(Token(TT_LEFT_PAREN, position_start=self.position))
-          self.advance()
-        elif self.current_character == ')':
-          tokens.append(Token(TT_RIGHT_PAREN, position_start=self.position))
-          self.advance()
-        elif self.current_character == '[':
-          tokens.append(Token(TT_LEFT_SQUARE, position_start=self.position))
-          self.advance()
-        elif self.current_character == ']':
-          tokens.append(Token(TT_RIGHT_SQUARE, position_start=self.position))
-          self.advance()
-        elif self.current_character == '{':
-          tokens.append(Token(TT_LEFT_BRACE, position_start=self.position))
-          self.advance()
-        elif self.current_character == '}':
-          tokens.append(Token(TT_RIGHT_BRACE, position_start=self.position))
-          self.advance()
-        elif self.current_character == '!':
-          token, error = self.not_equals()
-          if error: return [], error
-          tokens.append(token)
-        elif self.current_character == '=':
-          tokens.append(self.equalize())
-        elif self.current_character == '<':
-          tokens.append(self.less_than())
-        elif self.current_character == '>':
-          tokens.append(self.greater_than())
-        elif self.current_character == ',':
-          tokens.append(Token(TT_COMMA, position_start=self.position))
-          self.advance()
+            consecutive_newlines += 1
         else:
-          position_start = self.position.copy()
-          char = self.current_character
-          self.advance()
-          return [], IllegalCharacterError(position_start, self.position, "'" + char + "'")
+            # Process actual code tokens
+            if self.current_character in DIGITS:
+                tokens.append(self.digitize())
+            elif self.current_character in LETTERS:
+                token = self.identifize()
+
+                # Check if this is a function definition
+                if token.type == TT_KEYWORD and token.value == 'func':
+                    # If we had a previous function and not enough blank lines
+                    if last_token_was_func and consecutive_newlines < 2:
+                        # Insert a special token to indicate missing blank line
+                        tokens.append(Token(TT_NO_BLANK_LINE, position_start=last_func_position, position_end=token.position_start))
+
+                    last_token_was_func = True
+                    last_func_position = token.position_start.copy()
+                    consecutive_newlines = 0
+
+                tokens.append(token)
+            elif self.current_character == ':':
+              tokens.append(Token(TT_COLON, position_start=self.position))
+              self.advance()
+            elif self.current_character == '"':
+              tokens.append(self.stringify())
+            elif self.current_character == '+':
+              tokens.append(Token(TT_PLUS, position_start=self.position))
+              self.advance()
+            elif self.current_character == '-':
+              tokens.append(Token(TT_MINUS, position_start=self.position))
+              self.advance()
+            elif self.current_character == '*':
+              tokens.append(Token(TT_MULTIPLY, position_start=self.position))
+              self.advance()
+            elif self.current_character == '/':
+              tokens.append(Token(TT_DIVIDE, position_start=self.position))
+              self.advance()
+            elif self.current_character == '^':
+              tokens.append(Token(TT_POWER, position_start=self.position))
+              self.advance()
+            elif self.current_character == '(':
+              tokens.append(Token(TT_LEFT_PAREN, position_start=self.position))
+              self.advance()
+            elif self.current_character == ')':
+              tokens.append(Token(TT_RIGHT_PAREN, position_start=self.position))
+              self.advance()
+            elif self.current_character == '[':
+              tokens.append(Token(TT_LEFT_SQUARE, position_start=self.position))
+              self.advance()
+            elif self.current_character == ']':
+              tokens.append(Token(TT_RIGHT_SQUARE, position_start=self.position))
+              self.advance()
+            elif self.current_character == '{':
+              tokens.append(Token(TT_LEFT_BRACE, position_start=self.position))
+              self.advance()
+            elif self.current_character == '}':
+              tokens.append(Token(TT_RIGHT_BRACE, position_start=self.position))
+              self.advance()
+            elif self.current_character == '!':
+              token, error = self.not_equals()
+              if error: return [], error
+              tokens.append(token)
+            elif self.current_character == '=':
+              tokens.append(self.equalize())
+            elif self.current_character == '<':
+              tokens.append(self.less_than())
+            elif self.current_character == '>':
+              tokens.append(self.greater_than())
+            elif self.current_character == ',':
+              tokens.append(Token(TT_COMMA, position_start=self.position))
+              self.advance()
+            else:
+              position_start = self.position.copy()
+              char = self.current_character
+              self.advance()
+              return [], IllegalCharacterError(position_start, self.position, "'" + char + "'")
 
     tokens.append(Token(TT_END_OF_FILE, position_start=self.position))
     return tokens, None
