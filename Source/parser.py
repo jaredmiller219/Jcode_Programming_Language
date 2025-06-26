@@ -130,6 +130,9 @@ class Parser:
       # Check if we're about to process a function definition
       is_next_func = self.current_token.type == TT_KEYWORD and self.current_token.value == 'func'
 
+      # Check if we're about to process a comment (this would be handled by the lexer)
+      # Since comments are stripped by the lexer, we can't directly check for them here
+
       # If the last statement was a function and we're about to process another function,
       # check if we had a blank line in between
       if last_func_end_position and is_next_func and not had_blank_line_after_func:

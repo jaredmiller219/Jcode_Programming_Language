@@ -24,7 +24,7 @@ class Lexer:
   def Tokenize(self):
     tokens = []
 
-    # Track newlines for blank line detection
+    # Track newlines and function definitions
     consecutive_newlines = 0
     last_token_was_func = False
     last_func_position = None
@@ -33,37 +33,55 @@ class Lexer:
         if self.current_character in ' \t':
             self.advance()
         elif self.current_character == '#':
-            # Skip comment but don't reset consecutive_newlines
+            # If we're right after a function and haven't seen a blank line,
+            # insert a special token
+            if last_token_was_func and consecutive_newlines < 2:
+                tokens.append(Token(TT_NO_BLANK_LINE, position_start=self.position, position_end=self.position))
             self.skip_comment()
         elif self.current_character == '/' and self.check_next_character('/'):
-            # Skip comment but don't reset consecutive_newlines
+            # If we're right after a function and haven't seen a blank line,
+            # insert a special token
+            if last_token_was_func and consecutive_newlines < 2:
+                tokens.append(Token(TT_NO_BLANK_LINE, position_start=self.position, position_end=self.position))
             self.skip_double_slash_comment()
         elif self.current_character == '/' and self.check_next_character('*'):
-            # Skip comment but don't reset consecutive_newlines
+            # If we're right after a function and haven't seen a blank line,
+            # insert a special token
+            if last_token_was_func and consecutive_newlines < 2:
+                tokens.append(Token(TT_NO_BLANK_LINE, position_start=self.position, position_end=self.position))
             self.skip_block_comment()
         elif self.current_character in ';\n':
             tokens.append(Token(TT_NEWLINE, position_start=self.position))
             self.advance()
             consecutive_newlines += 1
+
+            # If we've seen 2 or more consecutive newlines, reset the function flag
+            if consecutive_newlines >= 2:
+                last_token_was_func = False
         else:
             # Process actual code tokens
             if self.current_character in DIGITS:
                 tokens.append(self.digitize())
+                consecutive_newlines = 0
             elif self.current_character in LETTERS:
                 token = self.identifize()
+                tokens.append(token)
 
                 # Check if this is a function definition
                 if token.type == TT_KEYWORD and token.value == 'func':
-                    # If we had a previous function and not enough blank lines
-                    if last_token_was_func and consecutive_newlines < 2:
-                        # Insert a special token to indicate missing blank line
-                        tokens.append(Token(TT_NO_BLANK_LINE, position_start=last_func_position, position_end=token.position_start))
-
                     last_token_was_func = True
                     last_func_position = token.position_start.copy()
-                    consecutive_newlines = 0
 
-                tokens.append(token)
+                consecutive_newlines = 0
+            elif self.current_character == '}':
+                tokens.append(Token(TT_RIGHT_BRACE, position_start=self.position))
+                self.advance()
+
+                # Mark that we just ended a function
+                # This is a simplistic approach - in reality you'd need to track
+                # if this brace is actually ending a function
+                last_token_was_func_end = True
+                last_func_end_position = self.position.copy()
             elif self.current_character == ':':
               tokens.append(Token(TT_COLON, position_start=self.position))
               self.advance()
