@@ -11,6 +11,7 @@ expr        : KEYWORD:VAR IDENTIFIER COLON expr
             : comp-expr ((KEYWORD:AND|KEYWORD:OR) comp-expr)*
 
 # Function definitions must be separated by at least one blank line
+# A blank line is also required between a function definition and any subsequent comment
 func-def    : KEYWORD:FUNC IDENTIFIER?
               LPAREN (param-def (COMMA param-def)*)? RPAREN
               (ARROW expr)
