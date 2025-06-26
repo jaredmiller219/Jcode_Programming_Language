@@ -170,6 +170,10 @@ class Parser:
     parseResult = ParseResult()
     position_start = self.current_token.position_start.copy()
 
+    # Check for main function definition
+    if self.current_token.type == TT_IDENTIFIER and self.current_token.value == 'main':
+        return self.main_func_def()
+
     # Original statement method without the added error messages
     if self.current_token.matches(TT_KEYWORD, 'return'):
       parseResult.register_advancement()
@@ -949,6 +953,72 @@ class Parser:
               self.current_token.position_start, self.current_token.position_end,
               f"Expected '=>', 'return', ':' or '{{'"
           ))
+
+  def main_func_def(self):
+    res = ParseResult()
+
+    # Check for 'main' identifier
+    if not (self.current_token.type == TT_IDENTIFIER and self.current_token.value == 'main'):
+        return res.failure(InvalidSyntaxError(
+            self.current_token.pos_start, self.current_token.pos_end,
+            "Expected 'main'"
+        ))
+
+    main_token = self.current_token
+    res.register_advancement()
+    self.advance()
+
+    # Check for opening parenthesis
+    if self.current_token.type != TT_LEFT_PAREN:
+        return res.failure(InvalidSyntaxError(
+            self.current_token.pos_start, self.current_token.pos_end,
+            "Expected '('"
+        ))
+
+    res.register_advancement()
+    self.advance()
+
+    # Check for closing parenthesis (no arguments allowed)
+    if self.current_token.type != TT_RIGHT_PAREN:
+        return res.failure(InvalidSyntaxError(
+            self.current_token.pos_start, self.current_token.pos_end,
+            "Expected ')'"
+        ))
+
+    res.register_advancement()
+    self.advance()
+
+    # Check for opening brace
+    if self.current_token.type != TT_LEFT_BRACE:
+        return res.failure(InvalidSyntaxError(
+            self.current_token.pos_start, self.current_token.pos_end,
+            "Expected '{'"
+        ))
+
+    res.register_advancement()
+    self.advance()
+
+    # Parse the function body
+    body = res.register(self.statements())
+    if res.error: return res
+
+    # Check for closing brace
+    if self.current_token.type != TT_RIGHT_BRACE:
+        return res.failure(InvalidSyntaxError(
+            self.current_token.pos_start, self.current_token.pos_end,
+            "Expected '}'"
+        ))
+
+    res.register_advancement()
+    self.advance()
+
+    # Create a function definition node with the main token
+    return res.success(FuncDefNode(
+        main_token,  # var_name_token
+        [],          # arg_name_tokens (empty for main)
+        body,        # body_node
+        True         # should_auto_return
+    ))
 
   ###################################
 

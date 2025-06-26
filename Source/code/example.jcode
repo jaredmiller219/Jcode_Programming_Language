@@ -32,9 +32,7 @@ func map(list elements, function fn){
     return new_elements
 }
 
-# main code
 print("Greetings universe!")
-
 for i = 0 to 4:
     print(join(map(["jump into the l", "you look like p"], oopify), ", "))
 end

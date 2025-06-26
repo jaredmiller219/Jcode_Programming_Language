@@ -18,6 +18,14 @@ func-def    : KEYWORD:FUNC IDENTIFIER?
             | ((COLON|LBRACE) NEWLINE statements (KEYWORD:END|RBRACE))
             : NEWLINE NEWLINE+  # At least one blank line after function definition
 
+# The main function serves as the entry point for JCode programs
+# Every JCode program MUST have exactly one main function
+# The main function takes no arguments and is called automatically when the program starts
+main-func   : IDENTIFIER:main
+              LPAREN RPAREN
+              LBRACE NEWLINE statements RBRACE
+              NEWLINE NEWLINE+  # At least one blank line after function definition
+
 comp-expr   : NOT comp-expr
             : arith-expr ((EE|LT|GT|LTE|GTE) arith-expr)*
 
