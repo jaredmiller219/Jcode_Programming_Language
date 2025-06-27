@@ -170,11 +170,8 @@ class Parser:
     parseResult = ParseResult()
     position_start = self.current_token.position_start.copy()
 
-    # Check for main function definition
-    if self.current_token.type == TT_IDENTIFIER and self.current_token.value == 'main':
-        return self.main_func_def()
-
-    # Original statement method without the added error messages
+    # Remove the main function check
+    # Original statement method
     if self.current_token.matches(TT_KEYWORD, 'return'):
       parseResult.register_advancement()
       self.advance()

@@ -54,28 +54,6 @@ def run(fn, text):
     interpreter = Interpreter()
     result = interpreter.visit(ast.node, context)
 
-    if result.error:
-        return None, result.error
-
-    # Check if this is a .jcode file (not the REPL or a code snippet)
-    is_jcode_file = fn.endswith('.jcode') or fn.endswith('.jc')
-
-    # Check if there's a main function defined
-    main_function = context.symbol_table.get('main')
-    if main_function and isinstance(main_function, Function):
-        # Execute the main function with no arguments
-        result = main_function.execute([], Position(0, 0, 0, fn, text))
-        return result.value, result.error
-    elif is_jcode_file:
-        # Return an error if no main function is found in a .jcode file
-        return None, RuntimeError(
-            Position(0, 0, 0, fn, text),
-            Position(0, 0, 0, fn, text),
-            "No 'main' function found. Every JCode program must have a 'main' function.",
-            context
-        )
-
-    # For REPL or non-.jcode files, return the result without requiring a main function
     return result.value, result.error
 
 def main():
