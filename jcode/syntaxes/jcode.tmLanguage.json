@@ -78,12 +78,63 @@
           "end": "$"
         },
         {
+          "name": "comment.line.documentation.jcode",
+          "begin": "///",
+          "end": "$",
+          "captures": {
+            "0": {
+              "name": "punctuation.definition.comment.documentation.jcode"
+            }
+          }
+        },
+        {
           "name": "comment.block.jcode",
           "begin": "/\\*",
           "end": "\\*/",
           "captures": {
             "0": {
               "name": "punctuation.definition.comment.jcode"
+            }
+          }
+        },
+        {
+          "name": "comment.block.documentation.jcode",
+          "begin": "/\\*\\*",
+          "end": "\\*/",
+          "captures": {
+            "0": {
+              "name": "punctuation.definition.comment.documentation.jcode"
+            }
+          }
+        }
+      ]
+    },
+    "xml-doc-tags": {
+      "patterns": [
+        {
+          "name": "keyword.other.documentation.tag.jcode",
+          "match": "(</?)(summary|param|returns|remarks|example|exception|see)(>)",
+          "captures": {
+            "1": {
+              "name": "punctuation.definition.tag.begin.jcode"
+            },
+            "2": {
+              "name": "entity.name.tag.jcode"
+            },
+            "3": {
+              "name": "punctuation.definition.tag.end.jcode"
+            }
+          }
+        },
+        {
+          "name": "keyword.other.documentation.attribute.jcode",
+          "match": "(name)=\"([^\"]+)\"",
+          "captures": {
+            "1": {
+              "name": "entity.other.attribute-name.jcode"
+            },
+            "2": {
+              "name": "string.quoted.double.jcode"
             }
           }
         }

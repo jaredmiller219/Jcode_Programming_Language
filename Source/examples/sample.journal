@@ -1,0 +1,25 @@
+/**
+ * Function Journal for example.jcode
+ * Generated automatically
+ */
+
+/// <summary>
+/// functions
+/// </summary>
+/// <param name="prefix">Description of prefix</param>
+/// <returns>Description of return value</returns>
+func oopify(string prefix) return prefix + "oop"
+
+/*
+ * join function
+ * Joins a list of elements with a separator
+ */
+ func join(list elements, string separator)
+
+/// <summary>
+/// The map function
+/// </summary>
+/// <param name="elements">Description of elements</param>
+/// <param name="fn">Description of fn</param>
+func map(list elements, function fn)
+
