@@ -7,6 +7,7 @@ from tokens import *
 from errors import *
 from nodes import *
 from utils import suggest_keyword
+from xml_doc_parser import XmlDocComment
 
 class Parser:
   def __init__(self, tokens):

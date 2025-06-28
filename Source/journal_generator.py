@@ -15,21 +15,21 @@ class JournalGenerator:
         with open(source_path, 'r', encoding='utf-8') as f:
             content = f.read()
 
-        # Find all function definitions with their preceding comments
-        pattern = r'((?:(?://|#).*\n)+|\s*(?:/\*(?:.|\n)*?\*/)\s*)?\s*(func\s+[a-zA-Z_][a-zA-Z0-9_]*\s*\([^{]*(?:\)\s*\{|\)(?:\s*return\s+[^{]+)?))'
+        # Find all function definitions with their preceding XML documentation comments
+        pattern = r'((?:///.*\n)+|/\*\*(?:.|\n)*?\*/\s*)?\s*(func\s+[a-zA-Z_][a-zA-Z0-9_]*\s*\([^{]*(?:\)\s*\{|\)(?:\s*return\s+[^{]+)?))'
         matches = re.finditer(pattern, content, re.MULTILINE)
 
         for match in matches:
-            comments = match.group(1) or ""
+            xml_docs = match.group(1) or ""
             signature = match.group(2).strip()
 
             # Clean up signature to remove opening brace if present
             signature = re.sub(r'\s*\{\s*$', '', signature)
 
-            # Clean up comments
-            comments = comments.strip()
+            # Clean up XML docs
+            xml_docs = xml_docs.strip()
 
-            self.functions.append((signature, comments))
+            self.functions.append((signature, xml_docs))
 
         return True, None
 

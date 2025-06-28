@@ -1,0 +1,81 @@
+/// <summary>
+/// Adds "oop" to the end of a string
+/// </summary>
+/// <param name="prefix">The string to append "oop" to</param>
+/// <returns>The input string with "oop" appended</returns>
+/// <example>
+/// <code>
+/// var result = oopify("l");  // Returns "loop"
+/// var result2 = oopify("p"); // Returns "poop"
+/// </code>
+/// </example>
+/// <remarks>
+/// This is a simple function that demonstrates string concatenation.
+/// It's used in the <see cref="join"/> example.
+/// </remarks>
+func oopify(string prefix) return prefix + "oop"
+
+/**
+ * <summary>
+ * Joins a list of elements with a separator
+ * </summary>
+ * <param name="elements">The list of elements to join</param>
+ * <param name="separator">The string to insert between elements</param>
+ * <returns>A single string with all elements joined together</returns>
+ * <example>
+ * <code>
+ * join(["a", "b", "c"], "-") // Returns "a-b-c"
+ * join(["hello", "world"], " ") // Returns "hello world"
+ * </code>
+ * </example>
+ * <exception cref="ValueError">Thrown when <paramref name="elements"/> is not a list</exception>
+ * <remarks>
+ * This function is similar to the join method in many other languages.
+ * It iterates through each element in the list and concatenates them
+ * with the separator in between.
+ * </remarks>
+ * <seealso cref="map"/>
+ */
+func join(list elements, string separator) {
+    string result: ""
+    var len: len(elements)
+
+    for i = 0 to len {
+        var result: result + elements[i]
+        if i != len - 1:
+            var result: result + separator
+    }
+
+    return result
+}
+
+/// <summary>
+/// Maps a function over each element in a list
+/// </summary>
+/// <param name="elements">The list to map over</param>
+/// <param name="fn">The function to apply to each element</param>
+/// <returns>A new list with the function applied to each element</returns>
+/// <example>
+/// <code>
+/// // Double each number in a list
+/// func double(n) return n * 2
+/// var numbers = [1, 2, 3, 4]
+/// var doubled = map(numbers, double) // Returns [2, 4, 6, 8]
+/// </code>
+/// </example>
+/// <remarks>
+/// This is a higher-order function that takes another function as an argument.
+/// It applies the given function to each element in the list and returns a new list
+/// with the transformed values.
+/// </remarks>
+/// <seealso cref="filter"/>
+/// <seealso cref="reduce"/>
+func map(list elements, function fn) {
+    var new_elements: []
+
+    for i = 0 to len(elements) {
+        append(new_elements, fn(elements[i]))
+    }
+
+    return new_elements
+}

@@ -280,3 +280,39 @@ class Lexer:
           self.advance()
           break
         self.advance()
+
+  def make_doc_comment(self):
+    comment = ''
+    pos_start = self.pos.copy()
+
+    # Consume the three slashes
+    self.advance()
+    self.advance()
+    self.advance()
+
+    # Collect the rest of the line
+    while self.current_char != None and self.current_char != '\n':
+        comment += self.current_char
+        self.advance()
+
+    return Token(TT_COMMENT, '///' + comment, pos_start, self.pos)
+
+  def make_doc_block_comment(self):
+    comment = ''
+    pos_start = self.pos.copy()
+
+    # Consume the opening /**
+    self.advance()
+    self.advance()
+    self.advance()
+
+    # Collect until closing */
+    while self.current_char != None:
+        if self.current_char == '*' and self.peek() == '/':
+            self.advance()
+            self.advance()
+            break
+        comment += self.current_char
+        self.advance()
+
+    return Token(TT_COMMENT, '/**' + comment + '*/', pos_start, self.pos)

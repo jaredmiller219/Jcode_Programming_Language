@@ -22,6 +22,11 @@ func oopify(string prefix) return prefix + "oop"
     return result
 }
 
+/// <summary>
+/// The map function
+/// </summary>
+/// <param name="elements">Description of elements</param>
+/// <param name="fn">Description of fn</param>
 func map(list elements, function fn){
     var new_elements: []
 

@@ -91,12 +91,14 @@ class WhileNode:
     self.position_end = self.body_node.position_end
 
 class FuncDefNode:
-  def __init__(self, variable_name_token, argument_name_tokens, body_node, should_auto_return, argument_type_tokens=None):
+  def __init__(self, variable_name_token, argument_name_tokens, body_node, should_auto_return, argument_type_tokens=None, return_type_token=None, xml_doc=None):
     self.variable_name_token = variable_name_token
     self.argument_name_tokens = argument_name_tokens
     self.argument_type_tokens = argument_type_tokens or [None] * len(argument_name_tokens)
     self.body_node = body_node
     self.should_auto_return = should_auto_return
+    self.return_type_token = return_type_token
+    self.xml_doc = xml_doc
 
     if self.variable_name_token:
       self.position_start = self.variable_name_token.position_start

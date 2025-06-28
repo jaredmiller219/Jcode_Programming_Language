@@ -81,11 +81,12 @@
           "name": "comment.line.documentation.jcode",
           "begin": "///",
           "end": "$",
-          "captures": {
+          "beginCaptures": {
             "0": {
               "name": "punctuation.definition.comment.documentation.jcode"
             }
-          }
+          },
+          "patterns": [{ "include": "#xml-doc-tags" }]
         },
         {
           "name": "comment.block.jcode",
@@ -101,42 +102,104 @@
           "name": "comment.block.documentation.jcode",
           "begin": "/\\*\\*",
           "end": "\\*/",
-          "captures": {
+          "beginCaptures": {
             "0": {
               "name": "punctuation.definition.comment.documentation.jcode"
             }
-          }
+          },
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.comment.documentation.jcode"
+            }
+          },
+          "patterns": [{ "include": "#xml-doc-tags" }]
         }
       ]
     },
     "xml-doc-tags": {
       "patterns": [
         {
-          "name": "keyword.other.documentation.tag.jcode",
-          "match": "(</?)(summary|param|returns|remarks|example|exception|see)(>)",
+          "name": "meta.tag.documentation.jcode",
+          "match": "(</?)(summary|param|typeparam|returns|value|remarks|example|exception|permission|note|seealso|see|inheritdoc|include|list|item|term|description|c|code|para|list|listheader|item|term|description|paramref|typeparamref|threadsafety|preliminary|exclude)(>)",
           "captures": {
             "1": {
-              "name": "punctuation.definition.tag.begin.jcode"
+              "name": "punctuation.definition.tag.documentation.jcode"
             },
             "2": {
-              "name": "entity.name.tag.jcode"
+              "name": "entity.name.tag.documentation.jcode"
             },
             "3": {
-              "name": "punctuation.definition.tag.end.jcode"
+              "name": "punctuation.definition.tag.documentation.jcode"
             }
           }
         },
         {
-          "name": "keyword.other.documentation.attribute.jcode",
-          "match": "(name)=\"([^\"]+)\"",
+          "name": "meta.tag.documentation.attribute.jcode",
+          "match": "(name|cref|href|file|path|member|static|instance|public|protected|internal|private|langword)=\"([^\"]+)\"",
           "captures": {
             "1": {
-              "name": "entity.other.attribute-name.jcode"
+              "name": "entity.other.attribute-name.documentation.jcode"
             },
             "2": {
-              "name": "string.quoted.double.jcode"
+              "name": "string.quoted.double.documentation.jcode"
             }
           }
+        },
+        {
+          "name": "meta.tag.documentation.paramref.jcode",
+          "match": "<(paramref|typeparamref)\\s+name=\"([^\"]+)\"\\s*/>",
+          "captures": {
+            "1": {
+              "name": "entity.name.tag.documentation.jcode"
+            },
+            "2": {
+              "name": "variable.parameter.documentation.jcode"
+            }
+          }
+        },
+        {
+          "name": "meta.tag.documentation.cref.jcode",
+          "match": "<(see|seealso)\\s+cref=\"([^\"]+)\"\\s*/>",
+          "captures": {
+            "1": {
+              "name": "entity.name.tag.documentation.jcode"
+            },
+            "2": {
+              "name": "entity.name.type.documentation.jcode"
+            }
+          }
+        },
+        {
+          "name": "meta.tag.documentation.c.jcode",
+          "begin": "<c>",
+          "end": "</c>",
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.definition.tag.documentation.jcode"
+            }
+          },
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.tag.documentation.jcode"
+            }
+          },
+          "contentName": "markup.inline.code.documentation.jcode"
+        },
+        {
+          "name": "meta.tag.documentation.code.jcode",
+          "begin": "<code>",
+          "end": "</code>",
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.definition.tag.documentation.jcode"
+            }
+          },
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.tag.documentation.jcode"
+            }
+          },
+          "contentName": "markup.raw.code.documentation.jcode"
         }
       ]
     },

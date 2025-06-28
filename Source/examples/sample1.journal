@@ -4,7 +4,7 @@
  */
 
 /// <summary>
-/// functions
+/// The oopify function
 /// </summary>
 /// <param name="prefix">Description of prefix</param>
 /// <returns>Description of return value</returns>

@@ -76,7 +76,13 @@ class JournalParser:
                 'signature': entry.signature,
                 'summary': '',
                 'params': [],
-                'returns': ''
+                'type_params': [],
+                'returns': '',
+                'remarks': '',
+                'examples': [],
+                'exceptions': [],
+                'see_also': [],
+                'value': ''
             }
 
             # Extract function name
@@ -85,25 +91,66 @@ class JournalParser:
                 func_info['name'] = name_match.group(1)
 
             # Extract summary
-            summary_match = re.search(r'///\s*<summary>\s*\n((?:///.*\n)+?)///\s*</summary>', entry.xml_docs)
+            summary_match = re.search(r'///\s*<summary>\s*\n((?:///.*\n)+?)///\s*</summary>|/\*\*\s*<summary>\s*\n((?:.*\n)+?)\s*</summary>', entry.xml_docs)
             if summary_match:
-                summary_lines = summary_match.group(1).strip().split('\n')
-                func_info['summary'] = '\n'.join([line.replace('///', '').strip() for line in summary_lines])
+                summary_group = summary_match.group(1) or summary_match.group(2)
+                summary_lines = summary_group.strip().split('\n')
+                func_info['summary'] = '\n'.join([re.sub(r'^///\s*|\s*\*\s*', '', line).strip() for line in summary_lines])
 
             # Extract params
-            param_matches = re.finditer(r'///\s*<param\s+name="([^"]+)">\s*(.*?)\s*</param>', entry.xml_docs)
+            param_matches = re.finditer(r'///\s*<param\s+name="([^"]+)">\s*(.*?)\s*</param>|/\*\*.*?<param\s+name="([^"]+)">\s*(.*?)\s*</param>', entry.xml_docs)
             for param_match in param_matches:
-                param_name = param_match.group(1)
-                param_desc = param_match.group(2)
+                param_name = param_match.group(1) or param_match.group(3)
+                param_desc = param_match.group(2) or param_match.group(4)
                 func_info['params'].append({
                     'name': param_name,
                     'description': param_desc
                 })
 
+            # Extract type params
+            typeparam_matches = re.finditer(r'///\s*<typeparam\s+name="([^"]+)">\s*(.*?)\s*</typeparam>|/\*\*.*?<typeparam\s+name="([^"]+)">\s*(.*?)\s*</typeparam>', entry.xml_docs)
+            for typeparam_match in typeparam_matches:
+                typeparam_name = typeparam_match.group(1) or typeparam_match.group(3)
+                typeparam_desc = typeparam_match.group(2) or typeparam_match.group(4)
+                func_info['type_params'].append({
+                    'name': typeparam_name,
+                    'description': typeparam_desc
+                })
+
             # Extract return info
-            returns_match = re.search(r'///\s*<returns>\s*(.*?)\s*</returns>', entry.xml_docs)
+            returns_match = re.search(r'///\s*<returns>\s*(.*?)\s*</returns>|/\*\*.*?<returns>\s*(.*?)\s*</returns>', entry.xml_docs)
             if returns_match:
-                func_info['returns'] = returns_match.group(1)
+                func_info['returns'] = returns_match.group(1) or returns_match.group(2)
+
+            # Extract remarks
+            remarks_match = re.search(r'///\s*<remarks>\s*\n((?:///.*\n)+?)///\s*</remarks>|/\*\*.*?<remarks>\s*\n((?:.*\n)+?)\s*</remarks>', entry.xml_docs)
+            if remarks_match:
+                remarks_group = remarks_match.group(1) or remarks_match.group(2)
+                remarks_lines = remarks_group.strip().split('\n')
+                func_info['remarks'] = '\n'.join([re.sub(r'^///\s*|\s*\*\s*', '', line).strip() for line in remarks_lines])
+
+            # Extract examples
+            example_matches = re.finditer(r'///\s*<example>\s*\n((?:///.*\n)+?)///\s*</example>|/\*\*.*?<example>\s*\n((?:.*\n)+?)\s*</example>', entry.xml_docs)
+            for example_match in example_matches:
+                example_group = example_match.group(1) or example_match.group(2)
+                example_lines = example_group.strip().split('\n')
+                func_info['examples'].append('\n'.join([re.sub(r'^///\s*|\s*\*\s*', '', line).strip() for line in example_lines]))
+
+            # Extract exceptions
+            exception_matches = re.finditer(r'///\s*<exception\s+cref="([^"]+)">\s*(.*?)\s*</exception>|/\*\*.*?<exception\s+cref="([^"]+)">\s*(.*?)\s*</exception>', entry.xml_docs)
+            for exception_match in exception_matches:
+                exception_type = exception_match.group(1) or exception_match.group(3)
+                exception_desc = exception_match.group(2) or exception_match.group(4)
+                func_info['exceptions'].append({
+                    'type': exception_type,
+                    'description': exception_desc
+                })
+
+            # Extract see also
+            seealso_matches = re.finditer(r'///\s*<seealso\s+cref="([^"]+)"\s*/>|/\*\*.*?<seealso\s+cref="([^"]+)"\s*/>', entry.xml_docs)
+            for seealso_match in seealso_matches:
+                seealso_cref = seealso_match.group(1) or seealso_match.group(2)
+                func_info['see_also'].append(seealso_cref)
 
             result.append(func_info)
 

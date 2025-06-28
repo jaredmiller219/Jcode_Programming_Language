@@ -10,16 +10,33 @@
     "Programming Languages"
   ],
   "contributes": {
-    "languages": [{
-      "id": "jcode",
-      "aliases": ["JCode Programming Language", "jcode"],
-      "extensions": [".jc",".jcode"],
-      "configuration": "./language-configuration.json"
-    }],
-    "grammars": [{
-      "language": "jcode",
-      "scopeName": "source.jcode",
-      "path": "./syntaxes/jcode.tmLanguage.json"
-    }]
+    "languages": [
+      {
+        "id": "jcode",
+        "aliases": [
+          "JCode Programming Language",
+          "jcode"
+        ],
+        "extensions": [
+          ".jc",
+          ".jcode"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "jcode",
+        "scopeName": "source.jcode",
+        "path": "./syntaxes/jcode.tmLanguage.json"
+      }
+    ],
+    "themes": [
+      {
+        "label": "JCode Theme",
+        "uiTheme": "vs-dark",
+        "path": "./themes/jcode-color-theme.json"
+      }
+    ]
   }
 }
