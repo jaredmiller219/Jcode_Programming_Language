@@ -43,10 +43,6 @@
           "name": "comment.block.jcode",
           "begin": "/\\*",
           "end": "\\*/"
-        },
-        {
-          "name": "comment.line.documentation.jcode",
-          "match": "///.*$"
         }
       ]
     },
@@ -55,6 +51,10 @@
         {
           "name": "keyword.control.jcode",
           "match": "\\b(if|elif|else|for|while|then|end|return|continue|break|to|step|and|or|not)\\b"
+        },
+        {
+          "name": "constant.language.jcode",
+          "match": "\\b(null|true|false)\\b"
         }
       ]
     },
@@ -72,12 +72,19 @@
     "functions": {
       "patterns": [
         {
-          "name": "entity.name.function.jcode",
-          "match": "\\b(func)\\s+([a-zA-Z_][a-zA-Z0-9_]*)"
+          "match": "\\b(func)\\s+([a-zA-Z_][a-zA-Z0-9_]*)",
+          "captures": {
+            "1": {
+              "name": "storage.type.jcode"
+            },
+            "2": {
+              "name": "entity.name.function.jcode"
+            }
+          }
         },
         {
-          "name": "support.function.jcode",
-          "match": "\\b(print|len|append)\\b"
+          "name": "support.function.call.jcode",
+          "match": "\\b(print|len|append)\\s*\\("
         }
       ]
     },
@@ -92,8 +99,24 @@
     "variables": {
       "patterns": [
         {
-          "name": "variable.parameter.jcode",
-          "match": "\\b([a-zA-Z_][a-zA-Z0-9_]*)\\s*:"
+          "match": "\\b([a-zA-Z_][a-zA-Z0-9_]*)\\s*=",
+          "captures": {
+            "1": {
+              "name": "variable.other.assignment.jcode"
+            }
+          }
+        },
+        {
+          "match": "\\b([a-zA-Z_][a-zA-Z0-9_]*)\\s*:",
+          "captures": {
+            "1": {
+              "name": "variable.parameter.jcode"
+            }
+          }
+        },
+        {
+          "name": "variable.other.jcode",
+          "match": "\\b([a-zA-Z_][a-zA-Z0-9_]*)\\b"
         }
       ]
     },
@@ -110,6 +133,10 @@
         {
           "name": "keyword.operator.jcode",
           "match": "(\\+|\\-|\\*|\\/|=|==|!=|<|>|<=|>=)"
+        },
+        {
+          "name": "punctuation.separator.jcode",
+          "match": "(,|;|\\.|:)"
         }
       ]
     }
