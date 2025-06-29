@@ -30,13 +30,6 @@
         "scopeName": "source.jcode",
         "path": "./syntaxes/jcode.tmLanguage.json"
       }
-    ],
-    "themes": [
-      {
-        "label": "JCode Theme",
-        "uiTheme": "vs-dark",
-        "path": "./themes/jcode-color-theme.json"
-      }
     ]
   }
 }

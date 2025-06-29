@@ -3,54 +3,58 @@
   "name": "JCode Programming Language",
   "scopeName": "source.jcode",
   "patterns": [
-    { "include": "#keywords" },
-    { "include": "#constants" },
-    { "include": "#types" },
-    { "include": "#numbers" },
-    { "include": "#strings" },
-    { "include": "#comments" },
-    { "include": "#functions" },
-    { "include": "#assignments" },
-    { "include": "#operators" },
-    { "include": "#functionCalls" },
-    { "include": "#brackets" },
-    { "include": "#punctuation" },
-    { "include": "#identifiers" }
+    {
+      "include": "#comments"
+    },
+    {
+      "include": "#keywords"
+    },
+    {
+      "include": "#strings"
+    },
+    {
+      "include": "#functions"
+    },
+    {
+      "include": "#types"
+    },
+    {
+      "include": "#variables"
+    },
+    {
+      "include": "#numbers"
+    },
+    {
+      "include": "#operators"
+    }
   ],
   "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.number-sign.jcode",
+          "match": "#.*$"
+        },
+        {
+          "name": "comment.line.double-slash.jcode",
+          "match": "//.*$"
+        },
+        {
+          "name": "comment.block.jcode",
+          "begin": "/\\*",
+          "end": "\\*/"
+        },
+        {
+          "name": "comment.line.documentation.jcode",
+          "match": "///.*$"
+        }
+      ]
+    },
     "keywords": {
       "patterns": [
         {
           "name": "keyword.control.jcode",
-          "match": "\\b(if|elif|else|for|while|then|end|func|return|continue|break|var|to|step|and|or|not|arrow)\\b"
-        }
-      ]
-    },
-    "constants": {
-      "patterns": [
-        {
-          "name": "constant.language.jcode",
-          "match": "\\b(null|true|false|math_pi)\\b"
-        }
-      ]
-    },
-    "types": {
-      "patterns": [
-        {
-          "name": "storage.type.jcode",
-          "match": "\\b(int|float|string|list|function)\\b"
-        }
-      ]
-    },
-    "numbers": {
-      "patterns": [
-        {
-          "name": "constant.numeric.float.jcode",
-          "match": "\\b\\d+\\.\\d+\\b"
-        },
-        {
-          "name": "constant.numeric.integer.jcode",
-          "match": "\\b\\d+\\b"
+          "match": "\\b(if|elif|else|for|while|then|end|return|continue|break|to|step|and|or|not)\\b"
         }
       ]
     },
@@ -65,234 +69,47 @@
         }
       ]
     },
-    "comments": {
-      "patterns": [
-        {
-          "name": "comment.line.double-slash.jcode",
-          "begin": "//",
-          "end": "$"
-        },
-        {
-          "name": "comment.line.number-sign.jcode",
-          "begin": "#",
-          "end": "$"
-        },
-        {
-          "name": "comment.line.documentation.jcode",
-          "begin": "///",
-          "end": "$",
-          "beginCaptures": {
-            "0": {
-              "name": "punctuation.definition.comment.documentation.jcode"
-            }
-          },
-          "patterns": [{ "include": "#xml-doc-tags" }]
-        },
-        {
-          "name": "comment.block.jcode",
-          "begin": "/\\*",
-          "end": "\\*/",
-          "captures": {
-            "0": {
-              "name": "punctuation.definition.comment.jcode"
-            }
-          }
-        },
-        {
-          "name": "comment.block.documentation.jcode",
-          "begin": "/\\*\\*",
-          "end": "\\*/",
-          "beginCaptures": {
-            "0": {
-              "name": "punctuation.definition.comment.documentation.jcode"
-            }
-          },
-          "endCaptures": {
-            "0": {
-              "name": "punctuation.definition.comment.documentation.jcode"
-            }
-          },
-          "patterns": [{ "include": "#xml-doc-tags" }]
-        }
-      ]
-    },
-    "xml-doc-tags": {
-      "patterns": [
-        {
-          "name": "meta.tag.documentation.jcode",
-          "match": "(</?)(summary|param|typeparam|returns|value|remarks|example|exception|permission|note|seealso|see|inheritdoc|include|list|item|term|description|c|code|para|list|listheader|item|term|description|paramref|typeparamref|threadsafety|preliminary|exclude)(>)",
-          "captures": {
-            "1": {
-              "name": "punctuation.definition.tag.documentation.jcode"
-            },
-            "2": {
-              "name": "entity.name.tag.documentation.jcode"
-            },
-            "3": {
-              "name": "punctuation.definition.tag.documentation.jcode"
-            }
-          }
-        },
-        {
-          "name": "meta.tag.documentation.attribute.jcode",
-          "match": "(name|cref|href|file|path|member|static|instance|public|protected|internal|private|langword)=\"([^\"]+)\"",
-          "captures": {
-            "1": {
-              "name": "entity.other.attribute-name.documentation.jcode"
-            },
-            "2": {
-              "name": "string.quoted.double.documentation.jcode"
-            }
-          }
-        },
-        {
-          "name": "meta.tag.documentation.paramref.jcode",
-          "match": "<(paramref|typeparamref)\\s+name=\"([^\"]+)\"\\s*/>",
-          "captures": {
-            "1": {
-              "name": "entity.name.tag.documentation.jcode"
-            },
-            "2": {
-              "name": "variable.parameter.documentation.jcode"
-            }
-          }
-        },
-        {
-          "name": "meta.tag.documentation.cref.jcode",
-          "match": "<(see|seealso)\\s+cref=\"([^\"]+)\"\\s*/>",
-          "captures": {
-            "1": {
-              "name": "entity.name.tag.documentation.jcode"
-            },
-            "2": {
-              "name": "entity.name.type.documentation.jcode"
-            }
-          }
-        },
-        {
-          "name": "meta.tag.documentation.c.jcode",
-          "begin": "<c>",
-          "end": "</c>",
-          "beginCaptures": {
-            "0": {
-              "name": "punctuation.definition.tag.documentation.jcode"
-            }
-          },
-          "endCaptures": {
-            "0": {
-              "name": "punctuation.definition.tag.documentation.jcode"
-            }
-          },
-          "contentName": "markup.inline.code.documentation.jcode"
-        },
-        {
-          "name": "meta.tag.documentation.code.jcode",
-          "begin": "<code>",
-          "end": "</code>",
-          "beginCaptures": {
-            "0": {
-              "name": "punctuation.definition.tag.documentation.jcode"
-            }
-          },
-          "endCaptures": {
-            "0": {
-              "name": "punctuation.definition.tag.documentation.jcode"
-            }
-          },
-          "contentName": "markup.raw.code.documentation.jcode"
-        }
-      ]
-    },
     "functions": {
       "patterns": [
         {
-          "name": "meta.function.definition.jcode",
-          "match": "\\bdef\\s+([a-zA-Z_][a-zA-Z0-9_]*)",
-          "captures": {
-            "1": {
-              "name": "entity.name.function.jcode"
-            }
-          }
+          "name": "entity.name.function.jcode",
+          "match": "\\b(func)\\s+([a-zA-Z_][a-zA-Z0-9_]*)"
+        },
+        {
+          "name": "support.function.jcode",
+          "match": "\\b(print|len|append)\\b"
         }
       ]
     },
-    "functionCalls": {
+    "types": {
       "patterns": [
         {
-          "name": "support.function.call.jcode",
-          "match": "\\b([a-zA-Z_][a-zA-Z0-9_]*)\\s*(?=\\()"
+          "name": "storage.type.jcode",
+          "match": "\\b(int|float|string|list|function|var|func)\\b"
         }
       ]
     },
-    "assignments": {
+    "variables": {
       "patterns": [
         {
-          "name": "meta.variable.assignment.jcode",
-          "match": "\\bvar\\s+([a-zA-Z_][a-zA-Z0-9_]*)\\s*(=)",
-          "captures": {
-            "1": {
-              "name": "variable.other.assignment.jcode"
-            },
-            "2": {
-              "name": "keyword.operator.assignment.jcode"
-            }
-          }
+          "name": "variable.parameter.jcode",
+          "match": "\\b([a-zA-Z_][a-zA-Z0-9_]*)\\s*:"
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.jcode",
+          "match": "\\b\\d+(\\.\\d+)?\\b"
         }
       ]
     },
     "operators": {
       "patterns": [
         {
-          "name": "keyword.operator.arithmetic.jcode",
-          "match": "(\\+|\\-|\\*|\\/|\\^|%)"
-        },
-        {
-          "name": "keyword.operator.assignment.jcode",
-          "match": "(=|\\+=|\\-=|\\*=|\\/=)"
-        },
-        {
-          "name": "keyword.operator.comparison.jcode",
-          "match": "(==|!=|<=|>=|<|>)"
-        },
-        {
-          "name": "keyword.operator.logical.jcode",
-          "match": "\\b(and|or|not)\\b"
-        },
-        {
-          "name": "keyword.operator.arrow.jcode",
-          "match": "->"
-        }
-      ]
-    },
-    "brackets": {
-      "patterns": [
-        {
-          "name": "punctuation.section.brackets.round.jcode",
-          "match": "[()]"
-        },
-        {
-          "name": "punctuation.section.brackets.square.jcode",
-          "match": "[\\[\\]]"
-        },
-        {
-          "name": "punctuation.section.brackets.curly.jcode",
-          "match": "[{}]"
-        }
-      ]
-    },
-    "punctuation": {
-      "patterns": [
-        {
-          "name": "punctuation.separator.jcode",
-          "match": "[,:]"
-        }
-      ]
-    },
-    "identifiers": {
-      "patterns": [
-        {
-          "name": "variable.other.jcode",
-          "match": "\\b[a-zA-Z_][a-zA-Z0-9_]*\\b"
+          "name": "keyword.operator.jcode",
+          "match": "(\\+|\\-|\\*|\\/|=|==|!=|<|>|<=|>=)"
         }
       ]
     }
