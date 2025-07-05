@@ -1,5 +1,6 @@
 import readline
 import os
+import pyfiglet
 
 from main import run
 
@@ -14,6 +15,11 @@ class ShellState:
 
     def was_interrupted(self):
         return self.was_keyboard_interrupt
+    
+def print_art():
+    art = pyfiglet.figlet_format("JCode Editor")
+    print(art)
+    print("Welcome to the JCode Editor!")
 
 def clear_screen():
     """Clears the terminal screen based on the operating system."""
@@ -188,6 +194,7 @@ def run_shell(shell_state):
 
 
 if __name__ == "__main__":
+    print_art()
     shell_state = ShellState()
     run_shell(shell_state)
 
