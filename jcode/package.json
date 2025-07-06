@@ -1,6 +1,10 @@
 {
   "name": "jcode",
   "displayName": "JCode",
+  "repository": {
+  "type": "git",
+  "url": "https://github.com/jaredmiller219/prog_lang"
+  },
   "description": "The Jcode language",
   "version": "0.0.1",
   "engines": {
