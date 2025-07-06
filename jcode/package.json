@@ -9,7 +9,6 @@
   "categories": [
     "Programming Languages"
   ],
-  "activationEvents": [],
   "contributes": {
     "languages": [
       {
