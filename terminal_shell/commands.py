@@ -171,6 +171,28 @@ def handle_pwd():
     print(os.getcwd())
 
 
+
+def handle_mkdir(folder_name: str = None):
+    """
+    Creates a new directory with the specified name.
+    
+    Args:
+        folder_name (str, optional): Name of the directory to create.
+    """
+    if not folder_name:
+        print("No folder name provided.")
+        return
+    
+    try:
+        path = os.path.expanduser(folder_name)
+        os.makedirs(path, exist_ok=False)
+        print(f"Directory '{folder_name}' created.")
+    except FileExistsError:
+        print(f"Directory '{folder_name}' already exists.")
+    except Exception as e:
+        print(f"Error creating directory: {e}")
+
+
 def handle_exit():
     print("Ending current session.")
 

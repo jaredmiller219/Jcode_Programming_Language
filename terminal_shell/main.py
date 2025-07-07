@@ -36,6 +36,8 @@ def shell_script() -> bool:
         "ls": commands.handle_ls,
         "cd": commands.handle_cd,
         "pwd": commands.handle_pwd,
+        "mkdir": commands.handle_mkdir,
+        "md": commands.handle_mkdir,
         "cat": commands.handle_cat,
         "ct": commands.handle_cat,
         "rm": commands.handle_rm,
@@ -49,7 +51,7 @@ def shell_script() -> bool:
 
     if command in commands_map:
         func = commands_map[command]
-        if command in ["list", "ls", "cd", "cat", "ct", "rm", "edit", "runfile"]:
+        if command in ["list", "ls", "cd", "mkdir", "md", "cat", "ct", "rm", "edit", "runfile"]:
             func(argument)
         elif command in ["exit", "quit", "qt"]:
             return False

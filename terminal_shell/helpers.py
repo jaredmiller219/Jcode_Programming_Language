@@ -19,7 +19,7 @@ def print_art():
 def welcome_message():
     print_art()
     print("Welcome to the JCode Editor!")
-    print('Tip: Type "help" to list available commands.')
+    print('Tip: Type "help" to list available commands.\n')
 
 
 def collect_multiline_input() -> list[str]:
