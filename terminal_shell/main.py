@@ -67,7 +67,7 @@ def main() -> None:
             if not shell_script():
                 break
     except KeyboardInterrupt:
-        print("\nKeyboardInterrupt: Exiting JCode Editor.")
+        print("\nExiting JCode Editor.")
 
 if __name__ == "__main__":
     main()
