@@ -70,4 +70,5 @@ def main():
 
 
 if __name__ == "__main__":
+    handle_clear()
     main()
