@@ -1,5 +1,6 @@
 import os
-from helpers import just_cleared, welcome_message, get_folder_icon 
+import sys
+from helpers import * 
 import commands
 
 
@@ -54,12 +55,10 @@ def shell_script() -> bool:
 
     if command in commands_map:
         func = commands_map[command]
-        if command in ["list", "ls", "cd", "mkdir", "md", "cat", "ct", "rm", "edit", "runfile"]:
-            func(argument)
-        elif command in ["exit", "quit", "qt"]:
-            return False
-        else:
-            func()
+        if command in ["list", "ls", "cd", "mkdir", "md", \
+             "cat", "ct", "rm", "edit", "runfile"]: func(argument)
+        elif command in ["exit", "quit", "qt"]: return False
+        else: func()
     else:
         commands.handle_unknown(command)
     return True
@@ -71,6 +70,9 @@ def main():
         while True:
             if not shell_script(): break
     except KeyboardInterrupt:
+        # Move to start of line, clear line
+        sys.stdout.write('\r\033[6C' + ' ' * 10 + '\r\033[6C')
+        sys.stdout.flush()
         print("\nExiting JCode Editor.")
 
 
