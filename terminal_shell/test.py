@@ -13,6 +13,7 @@ just_cleared = False
 open_folder_icon = "\U0001F4C2"
 closed_folder_icon = "\U0001F4C1"
 
+
 ###############################
 # Art & Welcome
 ###############################
@@ -23,6 +24,7 @@ def print_art() -> None:
     art = pyfiglet.figlet_format("JCode Editor")
     print(art, end="")
 
+
 def welcome_message() -> None:
     """
     Displays the welcome banner and instructions.
@@ -30,6 +32,7 @@ def welcome_message() -> None:
     print_art()
     print("Welcome to the JCode Editor!")
     print('Tip: Type "help" to list available commands.')
+
 
 ###############################
 # Help and Screen Utilities
@@ -75,6 +78,7 @@ def handle_clear():
     os.system("cls" if os.name == "nt" else "clear")
     just_cleared = True
 
+
 ###############################
 # File Handling
 ###############################
@@ -90,6 +94,7 @@ def handle_save() -> None:
     write_to_file(filename, "\n".join(lines))
     print(f"File '{filename}' saved successfully!")
 
+
 def collect_multiline_input() -> list[str]:
     """
     Collects multiple lines of user input until 'EOF' is entered.
@@ -102,6 +107,7 @@ def collect_multiline_input() -> list[str]:
         lines.append(line)
     return lines
 
+
 def write_to_file(filename: str, content: str) -> None:
     """
     Writes content to a specified file.
@@ -111,6 +117,7 @@ def write_to_file(filename: str, content: str) -> None:
             f.write(content)
     except Exception as e:
         print(f"Error saving file: {e}")
+
 
 def handle_load() -> None:
     """
@@ -128,6 +135,7 @@ def handle_load() -> None:
     except Exception as e:
         print(f"Error loading file: {e}")
 
+
 ###############################
 # Full-Screen Editor
 ###############################
@@ -143,6 +151,7 @@ def handle_edit(filename: str = None) -> None:
     result = app.run()
     print(result)
 
+
 def resolve_filename(filename: str) -> str:
     """
     Resolves or prompts for a filename and returns expanded path.
@@ -150,6 +159,7 @@ def resolve_filename(filename: str) -> str:
     if not filename:
         filename = input("Enter filename to edit: ")
     return os.path.expanduser(filename)
+
 
 def read_file_content(filepath: str) -> str:
     """
@@ -159,6 +169,7 @@ def read_file_content(filepath: str) -> str:
         with open(filepath, "r") as f:
             return f.read()
     return ""
+
 
 def build_editor_app(filepath: str, content: str) -> Application:
     """
@@ -193,6 +204,7 @@ def build_editor_app(filepath: str, content: str) -> Application:
     layout = Layout(frame)
     return Application(layout=layout, key_bindings=kb, full_screen=True)
 
+
 ###############################
 # Directory & File Commands
 ###############################
@@ -210,6 +222,7 @@ def handle_cd(path: str = None) -> None:
     except Exception as e:
         print(f"Error: {e}")
 
+
 def handle_ls(path: str = None) -> None:
     """
     List non-hidden files in the specified directory or current working directory if none given.
@@ -223,7 +236,7 @@ def handle_ls(path: str = None) -> None:
     """
     try:
         target_directory = os.path.expanduser(path) if path else os.getcwd()
-        
+
         # Filter out hidden files and directories (those starting with '.')
         all_entries = os.listdir(target_directory)
         visible_entries = [f for f in all_entries if not f.startswith('.')]
@@ -235,7 +248,7 @@ def handle_ls(path: str = None) -> None:
         folder_label = os.path.basename(target_directory)
         if not folder_label:
             folder_label = target_directory
-        
+
         if path is None and not os.path.isabs(folder_label):
             folder_label = f"./{folder_label}"
 
@@ -255,7 +268,7 @@ def handle_ls(path: str = None) -> None:
                 print()  # ensure ending with newline
         else:
             print(f"{closed_folder_icon} {folder_label} (empty)")
-    
+
     except FileNotFoundError:
         print(f"Directory '{path}' not found.")
     except NotADirectoryError:
@@ -264,6 +277,7 @@ def handle_ls(path: str = None) -> None:
         print(f"Permission denied to access '{path}'.")
     except Exception as error:
         print(f"Error listing files: {error}")
+
 
 def handle_cat(filename: str = None) -> None:
     """
@@ -278,6 +292,7 @@ def handle_cat(filename: str = None) -> None:
     except Exception as e:
         print(f"Error reading file: {e}")
 
+
 def handle_rm(filename: str = None) -> None:
     """
     Removes a specified file.
@@ -290,6 +305,7 @@ def handle_rm(filename: str = None) -> None:
         print(f"File '{filename}' removed.")
     except Exception as e:
         print(f"Error: {e}")
+
 
 ###############################
 # Python Execution
@@ -308,6 +324,7 @@ def handle_runfile(filename: str = None) -> None:
     except Exception as e:
         print(f"Error running file: {e}")
 
+
 def handle_run() -> None:
     """
     Executes a line of Python code input by the user.
@@ -324,6 +341,7 @@ def handle_run() -> None:
     except Exception as e:
         print(f"Error: {e}")
 
+
 ###############################
 # Other Utilities
 ###############################
@@ -334,17 +352,20 @@ def handle_pwd() -> None:
     """
     print(os.getcwd())
 
+
 def handle_exit() -> None:
     """
     Prints exit message.
     """
     print("Ending current session.")
 
+
 def handle_unknown(command: str) -> None:
     """
     Handles unknown commands.
     """
     print(f"Unknown command: {command}")
+
 
 #############################
 # Shell
@@ -358,7 +379,8 @@ def shell_script() -> bool:
     global just_cleared
 
     # Print newline only if screen was NOT just cleared
-    if not just_cleared: print()  # normal newline before prompt
+    if not just_cleared:
+        print()  # normal newline before prompt
     else:
         just_cleared = False  # reset flag, skip newline once
 
@@ -413,6 +435,7 @@ def shell_script() -> bool:
 
     return True
 
+
 #############################
 # Main Entry Point
 ###############################
@@ -430,6 +453,7 @@ def main() -> None:
                 break
     except KeyboardInterrupt:
         print("\nKeyboardInterrupt: Exiting JCode Editor.")
+
 
 #############################
 # Run the program

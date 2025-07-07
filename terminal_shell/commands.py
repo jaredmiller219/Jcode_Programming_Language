@@ -5,7 +5,8 @@ from helpers import (
     resolve_filename, read_file_content, build_editor_app,
 )
 
-def handle_help() -> None:
+
+def handle_help():
     print("=" * 40)
     print("JCode Editor Help")
     print("=" * 40)
@@ -33,14 +34,16 @@ def handle_help() -> None:
     print("  ct         Alias for cat")
     print("=" * 40)
 
-def handle_save() -> None:
+
+def handle_save():
     filename = input("Enter filename to save: ")
     print("Enter your content. Type 'eof' on a new line to finish.")
     lines = collect_multiline_input()
     write_to_file(filename, "\n".join(lines))
     print(f"File '{filename}' saved successfully!")
 
-def handle_load() -> None:
+
+def handle_load():
     filename = input("Enter filename to load: ")
     try:
         with open(filename, "r") as f:
@@ -53,7 +56,8 @@ def handle_load() -> None:
     except Exception as e:
         print(f"Error loading file: {e}")
 
-def handle_edit(filename: str = None) -> None:
+
+def handle_edit(filename: str = None):
     filepath = resolve_filename(filename)
     if not os.path.exists(filepath):
         print(f"File '{filepath}' does not exist. Cannot edit.")
@@ -64,7 +68,8 @@ def handle_edit(filename: str = None) -> None:
     result = app.run()
     print(result)
 
-def handle_cd(path: str = None) -> None:
+
+def handle_cd(path: str = None):
     if not path:
         print(f"Current directory: {os.getcwd()}")
         return
@@ -74,7 +79,8 @@ def handle_cd(path: str = None) -> None:
     except Exception as e:
         print(f"Error: {e}")
 
-def handle_ls(path: str = None) -> None:
+
+def handle_ls(path: str = None):
     try:
         target_directory = os.path.expanduser(path) if path else os.getcwd()
         all_entries = os.listdir(target_directory)
@@ -113,7 +119,8 @@ def handle_ls(path: str = None) -> None:
     except Exception as error:
         print(f"Error listing files: {error}")
 
-def handle_cat(filename: str = None) -> None:
+
+def handle_cat(filename: str = None):
     if not filename:
         print("No filename provided.")
         return
@@ -123,7 +130,8 @@ def handle_cat(filename: str = None) -> None:
     except Exception as e:
         print(f"Error reading file: {e}")
 
-def handle_rm(filename: str = None) -> None:
+
+def handle_rm(filename: str = None):
     if not filename:
         print("No filename provided.")
         return
@@ -133,7 +141,8 @@ def handle_rm(filename: str = None) -> None:
     except Exception as e:
         print(f"Error: {e}")
 
-def handle_runfile(filename: str = None) -> None:
+
+def handle_runfile(filename: str = None):
     if not filename:
         filename = input("Enter Python script filename to run: ")
     try:
@@ -143,7 +152,8 @@ def handle_runfile(filename: str = None) -> None:
     except Exception as e:
         print(f"Error running file: {e}")
 
-def handle_run() -> None:
+
+def handle_run():
     code = input("Enter Python code to run: ")
     try:
         result = eval(code)
@@ -156,11 +166,14 @@ def handle_run() -> None:
     except Exception as e:
         print(f"Error: {e}")
 
-def handle_pwd() -> None:
+
+def handle_pwd():
     print(os.getcwd())
 
-def handle_exit() -> None:
+
+def handle_exit():
     print("Ending current session.")
 
-def handle_unknown(command: str) -> None:
+
+def handle_unknown(command: str):
     print(f"Unknown command: {command}")

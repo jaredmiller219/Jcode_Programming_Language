@@ -2,23 +2,21 @@ import os
 from helpers import just_cleared, open_folder_icon, closed_folder_icon, welcome_message
 import commands
 
-def handle_clear() -> None:
-    global just_cleared
+
+def handle_clear():
     os.system("cls" if os.name == "nt" else "clear")
-    just_cleared = True
+    helpers.just_cleared = True
+
 
 def shell_script() -> bool:
-    global just_cleared
-
     if just_cleared:
         print(open_folder_icon + " " + os.getcwd())
-        just_cleared = False
+        helpers.just_cleared = False
     else:
         print("\n" + open_folder_icon + " " + os.getcwd())
 
     user_input = input("JCode> ").strip()
-    if not user_input:
-        return True
+    if not user_input: return True
 
     parts = user_input.split(maxsplit=1)
     command = parts[0].lower()
@@ -51,23 +49,23 @@ def shell_script() -> bool:
         func = commands_map[command]
         if command in ["list", "ls", "cd", "cat", "ct", "rm", "edit", "runfile"]:
             func(argument)
+        elif command in ["exit", "quit", "qt"]:
+            return False
         else:
             func()
-        if command in ["exit", "quit", "qt"]:
-            return False
     else:
         commands.handle_unknown(command)
-
     return True
 
-def main() -> None:
+
+def main():
     welcome_message()
     try:
         while True:
-            if not shell_script():
-                break
+            if not shell_script(): break
     except KeyboardInterrupt:
         print("\nExiting JCode Editor.")
+
 
 if __name__ == "__main__":
     main()
