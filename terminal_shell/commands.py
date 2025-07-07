@@ -86,9 +86,7 @@ def handle_ls(path: str):
         directories = [d for d in visible_entries if os.path.isdir(os.path.join(target_directory, d))]
         files = [f for f in visible_entries if os.path.isfile(os.path.join(target_directory, f))]
 
-        folder_label = os.path.basename(target_directory) or target_directory
-        if path is None and not os.path.isabs(folder_label):
-            folder_label = f"./{folder_label}"
+        folder_label = os.path.abspath(target_directory)
 
         combined_entries = directories + files
 
