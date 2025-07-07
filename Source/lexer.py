@@ -27,7 +27,7 @@ class Lexer:
     # Track newlines and function definitions
     consecutive_newlines = 0
     last_token_was_func = False
-    last_func_position = None
+    # last_func_position = None
 
     while self.current_character is not None:
         if self.current_character in ' \t':
@@ -70,7 +70,7 @@ class Lexer:
                 # Check if this is a function definition
                 if token.type == TT_KEYWORD and token.value == 'func':
                     last_token_was_func = True
-                    last_func_position = token.position_start.copy()
+                    # last_func_position = token.position_start.copy()
 
                 consecutive_newlines = 0
             elif self.current_character == '}':
@@ -80,8 +80,8 @@ class Lexer:
                 # Mark that we just ended a function
                 # This is a simplistic approach - in reality you'd need to track
                 # if this brace is actually ending a function
-                last_token_was_func_end = True
-                last_func_end_position = self.position.copy()
+                # last_token_was_func_end = True
+                # last_func_end_position = self.position.copy()
             elif self.current_character == ':':
               tokens.append(Token(TT_COLON, position_start=self.position))
               self.advance()
@@ -291,7 +291,7 @@ class Lexer:
     self.advance()
 
     # Collect the rest of the line
-    while self.current_char != None and self.current_char != '\n':
+    while self.current_char is not None and self.current_char != '\n':
         comment += self.current_char
         self.advance()
 
@@ -307,7 +307,7 @@ class Lexer:
     self.advance()
 
     # Collect until closing */
-    while self.current_char != None:
+    while self.current_char is not None:
         if self.current_char == '*' and self.peek() == '/':
             self.advance()
             self.advance()

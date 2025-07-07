@@ -79,8 +79,7 @@ class JournalGenerator:
                                 params.append(param_name)
 
                 # Convert existing comments to XML style if possible
-                xml_docs = []
-                xml_docs.append("/// <summary>")
+                xml_docs = ["/// <summary>"]
 
                 if comments:
                     # Try to extract description from comments
