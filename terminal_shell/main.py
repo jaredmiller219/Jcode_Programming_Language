@@ -4,14 +4,16 @@ import commands
 
 
 def handle_clear():
+    global just_cleared
     os.system("cls" if os.name == "nt" else "clear")
-    helpers.just_cleared = True
+    just_cleared = True
 
 
 def shell_script() -> bool:
+    global just_cleared
     if just_cleared:
         print(open_folder_icon + " " + os.getcwd())
-        helpers.just_cleared = False
+        just_cleared = False
     else:
         print("\n" + open_folder_icon + " " + os.getcwd())
 
