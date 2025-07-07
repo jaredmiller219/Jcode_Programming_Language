@@ -1,9 +1,5 @@
 import os
-from helpers import (
-    open_folder_icon, closed_folder_icon,
-    collect_multiline_input, write_to_file,
-    resolve_filename, read_file_content, build_editor_app,
-)
+from terminal_shell import helpers
 
 
 def handle_help():
@@ -38,8 +34,8 @@ def handle_help():
 def handle_save():
     filename = input("Enter filename to save: ")
     print("Enter your content. Type 'eof' on a new line to finish.")
-    lines = collect_multiline_input()
-    write_to_file(filename, "\n".join(lines))
+    lines = helpers.collect_multiline_input()
+    helpers.write_to_file(filename, "\n".join(lines))
     print(f"File '{filename}' saved successfully!")
 
 
@@ -57,21 +53,22 @@ def handle_load():
         print(f"Error loading file: {e}")
 
 
-def handle_edit(filename: str = None):
-    filepath = resolve_filename(filename)
+def handle_edit(filename: str):
+    filepath = helpers.resolve_filename(filename)
     if not os.path.exists(filepath):
         print(f"File '{filepath}' does not exist. Cannot edit.")
         return
 
-    content = read_file_content(filepath)
-    app = build_editor_app(filepath, content)
+    content = helpers.read_file_content(filepath)
+    app = helpers.build_editor_app(filepath, content)
     result = app.run()
     print(result)
 
 
-def handle_cd(path: str = None):
-    if not path:
-        print(f"Current directory: {os.getcwd()}")
+def handle_cd(path: str):
+    if not path or path == '.':
+        # print(f"Current directory: {os.getcwd()}")
+        print("Please provide a valid path")
         return
     try:
         os.chdir(os.path.expanduser(path))
@@ -80,7 +77,7 @@ def handle_cd(path: str = None):
         print(f"Error: {e}")
 
 
-def handle_ls(path: str = None):
+def handle_ls(path: str):
     try:
         target_directory = os.path.expanduser(path) if path else os.getcwd()
         all_entries = os.listdir(target_directory)
@@ -108,7 +105,7 @@ def handle_ls(path: str = None):
             if len(combined_entries) % columns != 0:
                 print()
         else:
-            print(f"{closed_folder_icon} {folder_label} (empty)")
+            print(f"{helpers.closed_folder_icon} {folder_label} (empty)")
 
     except FileNotFoundError:
         print(f"Directory '{path}' not found.")
@@ -120,7 +117,7 @@ def handle_ls(path: str = None):
         print(f"Error listing files: {error}")
 
 
-def handle_cat(filename: str = None):
+def handle_cat(filename: str):
     if not filename:
         print("No filename provided.")
         return
@@ -131,7 +128,7 @@ def handle_cat(filename: str = None):
         print(f"Error reading file: {e}")
 
 
-def handle_rm(filename: str = None):
+def handle_rm(filename: str):
     if not filename:
         print("No filename provided.")
         return
@@ -142,7 +139,7 @@ def handle_rm(filename: str = None):
         print(f"Error: {e}")
 
 
-def handle_runfile(filename: str = None):
+def handle_runfile(filename: str):
     if not filename:
         filename = input("Enter Python script filename to run: ")
     try:
@@ -172,7 +169,7 @@ def handle_pwd():
 
 
 
-def handle_mkdir(folder_name: str = None):
+def handle_mkdir(folder_name: str):
     """
     Creates a new directory with the specified name.
     

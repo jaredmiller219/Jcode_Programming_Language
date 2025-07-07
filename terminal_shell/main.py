@@ -1,5 +1,5 @@
 import os
-from helpers import just_cleared, open_folder_icon, closed_folder_icon, welcome_message
+from helpers import just_cleared, welcome_message, get_folder_icon 
 import commands
 
 
@@ -11,11 +11,14 @@ def handle_clear():
 
 def shell_script() -> bool:
     global just_cleared
+
+    current_dir = os.getcwd()
+    folder_icon = get_folder_icon(current_dir)
     if just_cleared:
-        print(open_folder_icon + " " + os.getcwd())
+        print(folder_icon + " " + current_dir)
         just_cleared = False
-    else:
-        print("\n" + open_folder_icon + " " + os.getcwd())
+    else: 
+        print("\n" + folder_icon + " " + current_dir)
 
     user_input = input("JCode> ").strip()
     if not user_input: return True

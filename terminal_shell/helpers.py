@@ -22,6 +22,23 @@ def welcome_message():
     print('Tip: Type "help" to list available commands.\n')
 
 
+def get_folder_icon(path: str) -> str:
+    """
+    Returns closed folder icon if the directory is empty, open icon otherwise.
+    Hidden files are ignored.
+    """
+    try:
+        all_entries = os.listdir(path)
+        visible_entries = [f for f in all_entries if not f.startswith('.')]
+        if visible_entries:
+            return open_folder_icon
+        else:
+            return closed_folder_icon
+    except Exception:
+        # If can't access directory, default to closed
+        return closed_folder_icon
+
+
 def collect_multiline_input() -> list[str]:
     lines = []
     while True:
