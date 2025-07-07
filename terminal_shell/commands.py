@@ -1,5 +1,5 @@
 import os
-from terminal_shell import helpers
+from helpers import *
 
 
 def handle_help():
@@ -34,8 +34,8 @@ def handle_help():
 def handle_save():
     filename = input("Enter filename to save: ")
     print("Enter your content. Type 'eof' on a new line to finish.")
-    lines = helpers.collect_multiline_input()
-    helpers.write_to_file(filename, "\n".join(lines))
+    lines = collect_multiline_input()
+    write_to_file(filename, "\n".join(lines))
     print(f"File '{filename}' saved successfully!")
 
 
@@ -54,13 +54,13 @@ def handle_load():
 
 
 def handle_edit(filename: str):
-    filepath = helpers.resolve_filename(filename)
+    filepath = resolve_filename(filename)
     if not os.path.exists(filepath):
         print(f"File '{filepath}' does not exist. Cannot edit.")
         return
 
-    content = helpers.read_file_content(filepath)
-    app = helpers.build_editor_app(filepath, content)
+    content = read_file_content(filepath)
+    app = build_editor_app(filepath, content)
     result = app.run()
     print(result)
 
@@ -105,7 +105,7 @@ def handle_ls(path: str):
             if len(combined_entries) % columns != 0:
                 print()
         else:
-            print(f"{helpers.closed_folder_icon} {folder_label} (empty)")
+            print(f"{closed_folder_icon} {folder_label} (empty)")
 
     except FileNotFoundError:
         print(f"Directory '{path}' not found.")
