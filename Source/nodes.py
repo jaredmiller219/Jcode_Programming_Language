@@ -142,3 +142,52 @@ class IndexNode:
     self.index_node = index_node
     self.position_start = position_start
     self.position_end = position_end
+
+class ClassDefNode:
+  def __init__(self, class_name_token, parent_class_token, method_nodes, position_start, position_end):
+    self.class_name_token = class_name_token
+    self.parent_class_token = parent_class_token  # For inheritance (extends)
+    self.method_nodes = method_nodes  # List of method definitions
+    self.position_start = position_start
+    self.position_end = position_end
+
+class MethodDefNode:
+  def __init__(self, method_name_token, argument_name_tokens, body_node, should_auto_return, argument_type_tokens=None, return_type_token=None, is_constructor=False):
+    self.method_name_token = method_name_token
+    self.argument_name_tokens = argument_name_tokens
+    self.argument_type_tokens = argument_type_tokens or [None] * len(argument_name_tokens)
+    self.body_node = body_node
+    self.should_auto_return = should_auto_return
+    self.return_type_token = return_type_token
+    self.is_constructor = is_constructor
+
+    if self.method_name_token:
+      self.position_start = self.method_name_token.position_start
+    elif len(self.argument_name_tokens) > 0:
+      self.position_start = self.argument_name_tokens[0].position_start
+    else:
+      self.position_start = self.body_node.position_start
+
+    self.position_end = self.body_node.position_end
+
+class InstanceCreationNode:
+  def __init__(self, class_name_token, argument_nodes, position_start, position_end):
+    self.class_name_token = class_name_token
+    self.argument_nodes = argument_nodes  # Arguments for constructor
+    self.position_start = position_start
+    self.position_end = position_end
+
+class AttributeAccessNode:
+  def __init__(self, object_node, attribute_name_token, position_start, position_end):
+    self.object_node = object_node  # The object being accessed
+    self.attribute_name_token = attribute_name_token  # The attribute/method name
+    self.position_start = position_start
+    self.position_end = position_end
+
+class MethodCallNode:
+  def __init__(self, object_node, method_name_token, argument_nodes, position_start, position_end):
+    self.object_node = object_node  # The object whose method is being called
+    self.method_name_token = method_name_token  # The method name
+    self.argument_nodes = argument_nodes  # Arguments for the method call
+    self.position_start = position_start
+    self.position_end = position_end

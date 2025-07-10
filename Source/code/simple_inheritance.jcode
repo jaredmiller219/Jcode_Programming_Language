@@ -1,0 +1,21 @@
+# Simple inheritance test
+
+class Animal {
+    func speak() {
+        print("Animal sound")
+    }
+}
+
+
+class Dog extends Animal {
+    func speak() {
+        print("Woof!")
+    }
+}
+
+
+var animal: new Animal()
+var dog: new Dog()
+
+animal.speak()
+dog.speak()

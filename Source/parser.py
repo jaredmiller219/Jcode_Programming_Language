@@ -267,6 +267,12 @@ class Parser:
       # Create a VarAssignNode with the is_constant flag
       return parseResult.success(VarAssignNode(variable_name, expression, type_token, is_constant))
 
+    # Check for class definition
+    elif self.current_token.matches(TT_KEYWORD, 'class'):
+      class_definition = parseResult.register(self.class_definition())
+      if parseResult.error: return parseResult
+      return parseResult.success(class_definition)
+
     node = parseResult.register(self.binary_operation(self.comparison_expression, ((TT_KEYWORD, 'and'), (TT_KEYWORD, 'or'))))
 
     if parseResult.error:
@@ -384,6 +390,67 @@ class Parser:
         self.current_token.position_end.copy()
       ))
 
+    # Handle dot notation for attribute access and method calls
+    elif self.current_token.type == TT_DOT:
+      parseResult.register_advancement()
+      self.advance()
+
+      if self.current_token.type != TT_IDENTIFIER:
+        return parseResult.failure(InvalidSyntaxError(
+          self.current_token.position_start, self.current_token.position_end,
+          "Expected attribute or method name after '.'"
+        ))
+
+      attribute_name_token = self.current_token
+      parseResult.register_advancement()
+      self.advance()
+
+      # Check if this is a method call (has parentheses)
+      if self.current_token.type == TT_LEFT_PAREN:
+        parseResult.register_advancement()
+        self.advance()
+        argument_nodes = []
+
+        if self.current_token.type == TT_RIGHT_PAREN:
+          parseResult.register_advancement()
+          self.advance()
+        else:
+          argument_nodes.append(parseResult.register(self.expression()))
+          if parseResult.error: return parseResult
+
+          while self.current_token.type == TT_COMMA:
+            parseResult.register_advancement()
+            self.advance()
+
+            argument_nodes.append(parseResult.register(self.expression()))
+            if parseResult.error: return parseResult
+
+          if self.current_token.type != TT_RIGHT_PAREN:
+            return parseResult.failure(InvalidSyntaxError(
+              self.current_token.position_start, self.current_token.position_end,
+              "Expected ',' or ')'"
+            ))
+
+          parseResult.register_advancement()
+          self.advance()
+
+        # Return a method call node
+        return parseResult.success(MethodCallNode(
+          atomic,
+          attribute_name_token,
+          argument_nodes,
+          atomic.position_start,
+          self.current_token.position_end.copy()
+        ))
+      else:
+        # Return an attribute access node
+        return parseResult.success(AttributeAccessNode(
+          atomic,
+          attribute_name_token,
+          atomic.position_start,
+          attribute_name_token.position_end
+        ))
+
     return parseResult.success(atomic)
 
   def atomic(self):
@@ -436,9 +503,17 @@ class Parser:
       function_definition = parseResult.register(self.function_definition())
       if parseResult.error: return parseResult
       return parseResult.success(function_definition)
+    elif token.matches(TT_KEYWORD, 'class'):
+      class_definition = parseResult.register(self.class_definition())
+      if parseResult.error: return parseResult
+      return parseResult.success(class_definition)
+    elif token.matches(TT_KEYWORD, 'new'):
+      instance_creation = parseResult.register(self.instance_creation())
+      if parseResult.error: return parseResult
+      return parseResult.success(instance_creation)
     return parseResult.failure(InvalidSyntaxError(
         token.position_start, token.position_end,
-        "Expected int, float, identifier, '+', '-', '(', '[', if', 'for', 'while', 'func'"
+        "Expected int, float, identifier, '+', '-', '(', '[', if', 'for', 'while', 'func', 'class', 'new'"
     ))
 
   def list_expression(self):
@@ -1036,3 +1111,298 @@ class Parser:
       left = BinaryOperationNode(left, operation_token, right)
 
     return parseResult.success(left)
+
+  def class_definition(self):
+    parseResult = ParseResult()
+
+    if not self.current_token.matches(TT_KEYWORD, 'class'):
+      return parseResult.failure(InvalidSyntaxError(
+        self.current_token.position_start, self.current_token.position_end,
+        "Expected 'class'"
+      ))
+
+    class_pos_start = self.current_token.position_start
+    parseResult.register_advancement()
+    self.advance()
+
+    # Get class name
+    if self.current_token.type != TT_IDENTIFIER:
+      return parseResult.failure(InvalidSyntaxError(
+        self.current_token.position_start, self.current_token.position_end,
+        "Expected class name"
+      ))
+
+    class_name_token = self.current_token
+    parseResult.register_advancement()
+    self.advance()
+
+    # Check for inheritance (extends keyword)
+    parent_class_token = None
+    if self.current_token.matches(TT_KEYWORD, 'extends'):
+      parseResult.register_advancement()
+      self.advance()
+
+      if self.current_token.type != TT_IDENTIFIER:
+        return parseResult.failure(InvalidSyntaxError(
+          self.current_token.position_start, self.current_token.position_end,
+          "Expected parent class name after 'extends'"
+        ))
+
+      parent_class_token = self.current_token
+      parseResult.register_advancement()
+      self.advance()
+
+    # Expect opening brace
+    if self.current_token.type != TT_LEFT_BRACE:
+      return parseResult.failure(InvalidSyntaxError(
+        self.current_token.position_start, self.current_token.position_end,
+        "Expected '{'"
+      ))
+
+    parseResult.register_advancement()
+    self.advance()
+
+    # Skip newlines
+    while self.current_token.type == TT_NEWLINE:
+      parseResult.register_advancement()
+      self.advance()
+
+    # Parse methods
+    method_nodes = []
+    while self.current_token.type != TT_RIGHT_BRACE and self.current_token.type != TT_END_OF_FILE:
+      if self.current_token.matches(TT_KEYWORD, 'func'):
+        method = parseResult.register(self.method_definition())
+        if parseResult.error: return parseResult
+        method_nodes.append(method)
+      else:
+        return parseResult.failure(InvalidSyntaxError(
+          self.current_token.position_start, self.current_token.position_end,
+          "Expected method definition or '}'"
+        ))
+
+      # Skip newlines between methods
+      while self.current_token.type == TT_NEWLINE:
+        parseResult.register_advancement()
+        self.advance()
+
+    if self.current_token.type != TT_RIGHT_BRACE:
+      return parseResult.failure(InvalidSyntaxError(
+        self.current_token.position_start, self.current_token.position_end,
+        "Expected '}'"
+      ))
+
+    parseResult.register_advancement()
+    self.advance()
+
+    return parseResult.success(ClassDefNode(
+      class_name_token,
+      parent_class_token,
+      method_nodes,
+      class_pos_start,
+      self.current_token.position_end.copy()
+    ))
+
+  def method_definition(self):
+    parseResult = ParseResult()
+
+    if not self.current_token.matches(TT_KEYWORD, 'func'):
+      return parseResult.failure(InvalidSyntaxError(
+        self.current_token.position_start, self.current_token.position_end,
+        "Expected 'func'"
+      ))
+
+    func_pos_start = self.current_token.position_start
+    parseResult.register_advancement()
+    self.advance()
+
+    # Get method name
+    if self.current_token.type != TT_IDENTIFIER:
+      return parseResult.failure(InvalidSyntaxError(
+        self.current_token.position_start, self.current_token.position_end,
+        "Expected method name"
+      ))
+
+    method_name_token = self.current_token
+    parseResult.register_advancement()
+    self.advance()
+
+    # Check for constructor (method name is same as class name or __init__)
+    is_constructor = method_name_token.value == '__init__'
+
+    if self.current_token.type != TT_LEFT_PAREN:
+      return parseResult.failure(InvalidSyntaxError(
+        self.current_token.position_start, self.current_token.position_end,
+        "Expected '('"
+      ))
+
+    parseResult.register_advancement()
+    self.advance()
+    argument_name_tokens = []
+    argument_type_tokens = []
+
+    # Check if we have parameters
+    if self.current_token.type != TT_RIGHT_PAREN:
+      # Parse first parameter
+      if self.current_token.type == TT_IDENTIFIER:
+        # Check if this is a type identifier
+        type_token = self.current_token
+        parseResult.register_advancement()
+        self.advance()
+
+        if self.current_token.type != TT_IDENTIFIER:
+          return parseResult.failure(InvalidSyntaxError(
+            self.current_token.position_start, self.current_token.position_end,
+            "Expected parameter name after type"
+          ))
+
+        argument_name_token = self.current_token
+        argument_type_tokens.append(type_token)
+        argument_name_tokens.append(argument_name_token)
+        parseResult.register_advancement()
+        self.advance()
+      else:
+        return parseResult.failure(InvalidSyntaxError(
+          self.current_token.position_start, self.current_token.position_end,
+          "Expected type identifier"
+        ))
+
+      # Parse additional parameters
+      while self.current_token.type == TT_COMMA:
+        parseResult.register_advancement()
+        self.advance()
+
+        if self.current_token.type != TT_IDENTIFIER:
+          return parseResult.failure(InvalidSyntaxError(
+            self.current_token.position_start, self.current_token.position_end,
+            "Expected type identifier"
+          ))
+
+        type_token = self.current_token
+        parseResult.register_advancement()
+        self.advance()
+
+        if self.current_token.type != TT_IDENTIFIER:
+          return parseResult.failure(InvalidSyntaxError(
+            self.current_token.position_start, self.current_token.position_end,
+            "Expected parameter name after type"
+          ))
+
+        argument_name_token = self.current_token
+        argument_type_tokens.append(type_token)
+        argument_name_tokens.append(argument_name_token)
+        parseResult.register_advancement()
+        self.advance()
+
+    if self.current_token.type != TT_RIGHT_PAREN:
+      return parseResult.failure(InvalidSyntaxError(
+        self.current_token.position_start, self.current_token.position_end,
+        "Expected ')', ',' or identifier"
+      ))
+
+    parseResult.register_advancement()
+    self.advance()
+
+    # Method body (similar to function definition)
+    if self.current_token.type == TT_LEFT_BRACE or self.current_token.type == TT_COLON:
+      parseResult.register_advancement()
+      self.advance()
+
+      # Check if we need a newline after colon
+      if self.current_token.type == TT_NEWLINE:
+        parseResult.register_advancement()
+        self.advance()
+
+      body = parseResult.register(self.statements())
+      if parseResult.error: return parseResult
+
+      if self.current_token.type == TT_RIGHT_BRACE:
+        parseResult.register_advancement()
+        self.advance()
+      elif self.current_token.matches(TT_KEYWORD, 'end'):
+        parseResult.register_advancement()
+        self.advance()
+      else:
+        return parseResult.failure(InvalidSyntaxError(
+          self.current_token.position_start, self.current_token.position_end,
+          "Expected '}' or 'end'"
+        ))
+
+      return parseResult.success(MethodDefNode(
+        method_name_token,
+        argument_name_tokens,
+        body,
+        False,
+        argument_type_tokens,
+        None,
+        is_constructor
+      ))
+    else:
+      return parseResult.failure(InvalidSyntaxError(
+        self.current_token.position_start, self.current_token.position_end,
+        "Expected '{' or ':'"
+      ))
+
+  def instance_creation(self):
+    parseResult = ParseResult()
+
+    if not self.current_token.matches(TT_KEYWORD, 'new'):
+      return parseResult.failure(InvalidSyntaxError(
+        self.current_token.position_start, self.current_token.position_end,
+        "Expected 'new'"
+      ))
+
+    new_pos_start = self.current_token.position_start
+    parseResult.register_advancement()
+    self.advance()
+
+    # Get class name
+    if self.current_token.type != TT_IDENTIFIER:
+      return parseResult.failure(InvalidSyntaxError(
+        self.current_token.position_start, self.current_token.position_end,
+        "Expected class name"
+      ))
+
+    class_name_token = self.current_token
+    parseResult.register_advancement()
+    self.advance()
+
+    # Expect opening parenthesis for constructor arguments
+    if self.current_token.type != TT_LEFT_PAREN:
+      return parseResult.failure(InvalidSyntaxError(
+        self.current_token.position_start, self.current_token.position_end,
+        "Expected '('"
+      ))
+
+    parseResult.register_advancement()
+    self.advance()
+    argument_nodes = []
+
+    if self.current_token.type == TT_RIGHT_PAREN:
+      parseResult.register_advancement()
+      self.advance()
+    else:
+      argument_nodes.append(parseResult.register(self.expression()))
+      if parseResult.error: return parseResult
+
+      while self.current_token.type == TT_COMMA:
+        parseResult.register_advancement()
+        self.advance()
+
+        argument_nodes.append(parseResult.register(self.expression()))
+        if parseResult.error: return parseResult
+
+      if self.current_token.type != TT_RIGHT_PAREN:
+        return parseResult.failure(InvalidSyntaxError(
+          self.current_token.position_start, self.current_token.position_end,
+          "Expected ',' or ')'"
+        ))
+
+      parseResult.register_advancement()
+      self.advance()
+
+    return parseResult.success(InstanceCreationNode(
+      class_name_token,
+      argument_nodes,
+      new_pos_start,
+      self.current_token.position_end.copy()
+    ))

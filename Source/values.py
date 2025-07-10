@@ -206,6 +206,11 @@ Number.false = Number(0)
 Number.true = Number(1)
 Number.math_PI = Number(math.pi)
 
+# Mark the singleton objects
+Number.null._is_null_singleton = True
+Number.false._is_false_singleton = True
+Number.true._is_true_singleton = True
+
 class String(Value):
   def __init__(self, value):
     super().__init__()
@@ -406,6 +411,11 @@ class BuiltInFunction(BaseFunction):
   extend: 'BuiltInFunction'
   len: 'BuiltInFunction'
   run: 'BuiltInFunction'
+  isinstance: 'BuiltInFunction'
+  hasattr: 'BuiltInFunction'
+  getattr: 'BuiltInFunction'
+  setattr: 'BuiltInFunction'
+  str: 'BuiltInFunction'
 
   def __init__(self, name):
     super().__init__(name)
@@ -628,6 +638,140 @@ class BuiltInFunction(BaseFunction):
     return RuntimeResult().success(Number.null)
   #execute_run.argument_names = ["function"]
 
+  @argument_names('obj', 'class_or_classname')
+  def execute_isinstance(self, execution_context):
+    obj = execution_context.symbol_table.get("obj")
+    class_or_classname = execution_context.symbol_table.get("class_or_classname")
+
+    if isinstance(obj, Instance):
+      if isinstance(class_or_classname, Class):
+        # Check if obj is instance of class_or_classname or its parents
+        current_class = obj.class_def
+        while current_class:
+          # Compare by name instead of object identity for more reliable comparison
+          if current_class.name == class_or_classname.name:
+            return RuntimeResult().success(Number.true)
+          current_class = current_class.parent_class
+        return RuntimeResult().success(Number.false)
+      elif isinstance(class_or_classname, String):
+        # Check by class name
+        current_class = obj.class_def
+        while current_class:
+          if current_class.name == class_or_classname.value:
+            return RuntimeResult().success(Number.true)
+          current_class = current_class.parent_class
+        return RuntimeResult().success(Number.false)
+
+    return RuntimeResult().success(Number.false)
+
+  @argument_names('obj', 'attr_name')
+  def execute_hasattr(self, execution_context):
+    obj = execution_context.symbol_table.get("obj")
+    attr_name = execution_context.symbol_table.get("attr_name")
+
+    if not isinstance(attr_name, String):
+      return RuntimeResult().failure(RuntimeError(
+        self.position_start, self.position_end,
+        "Attribute name must be a string",
+        execution_context
+      ))
+
+    if isinstance(obj, Instance):
+      attribute = obj.get_attribute(attr_name.value)
+      return RuntimeResult().success(Number.true if attribute is not None else Number.false)
+
+    return RuntimeResult().success(Number.false)
+
+  @argument_names('obj', 'attr_name', 'default')
+  def execute_getattr(self, execution_context):
+    obj = execution_context.symbol_table.get("obj")
+    attr_name = execution_context.symbol_table.get("attr_name")
+    default = execution_context.symbol_table.get("default")
+
+    if not isinstance(attr_name, String):
+      return RuntimeResult().failure(RuntimeError(
+        self.position_start, self.position_end,
+        "Attribute name must be a string",
+        execution_context
+      ))
+
+    if isinstance(obj, Instance):
+      attribute = obj.get_attribute(attr_name.value)
+      if attribute is not None:
+        return RuntimeResult().success(attribute)
+      elif default is not None:
+        return RuntimeResult().success(default)
+      else:
+        return RuntimeResult().failure(RuntimeError(
+          self.position_start, self.position_end,
+          f"'{obj.class_def.name}' object has no attribute '{attr_name.value}'",
+          execution_context
+        ))
+
+    return RuntimeResult().failure(RuntimeError(
+      self.position_start, self.position_end,
+      "Cannot get attribute of non-object",
+      execution_context
+    ))
+
+  @argument_names('obj', 'attr_name', 'value')
+  def execute_setattr(self, execution_context):
+    obj = execution_context.symbol_table.get("obj")
+    attr_name = execution_context.symbol_table.get("attr_name")
+    value = execution_context.symbol_table.get("value")
+
+    if not isinstance(attr_name, String):
+      return RuntimeResult().failure(RuntimeError(
+        self.position_start, self.position_end,
+        "Attribute name must be a string",
+        execution_context
+      ))
+
+    if isinstance(obj, Instance):
+      obj.set_attribute(attr_name.value, value)
+      return RuntimeResult().success(Number.null)
+
+    return RuntimeResult().failure(RuntimeError(
+      self.position_start, self.position_end,
+      f"Cannot set attribute of non-object (got {type(obj).__name__})",
+      execution_context
+    ))
+
+  @argument_names('value')
+  def execute_str(self, execution_context):
+    value = execution_context.symbol_table.get("value")
+
+    if isinstance(value, Number):
+      # Handle boolean values by checking value and context
+      if value.value == 1 and hasattr(value, '_is_true_singleton'):
+        return RuntimeResult().success(String("true"))
+      elif value.value == 0 and hasattr(value, '_is_false_singleton'):
+        return RuntimeResult().success(String("false"))
+      elif value.value == 0 and hasattr(value, '_is_null_singleton'):
+        return RuntimeResult().success(String("null"))
+      # Check by value for common boolean cases
+      elif value.value == 1:
+        # Could be true, check if it's in a boolean context
+        return RuntimeResult().success(String("true"))
+      elif value.value == 0:
+        # Could be false, check if it's in a boolean context
+        return RuntimeResult().success(String("false"))
+      # For regular numbers, check if it's an integer
+      elif value.value == int(value.value):
+        return RuntimeResult().success(String(str(int(value.value))))
+      else:
+        return RuntimeResult().success(String(str(value.value)))
+    elif isinstance(value, String):
+      return RuntimeResult().success(value.copy())
+    elif isinstance(value, List):
+      return RuntimeResult().success(String(str(value)))
+    elif isinstance(value, Instance):
+      return RuntimeResult().success(String(str(value)))
+    elif isinstance(value, Class):
+      return RuntimeResult().success(String(str(value)))
+    else:
+      return RuntimeResult().success(String(str(value)))
+
 BuiltInFunction.print       = BuiltInFunction("print")
 BuiltInFunction.print_ret   = BuiltInFunction("print_ret")
 BuiltInFunction.input       = BuiltInFunction("input")
@@ -642,3 +786,156 @@ BuiltInFunction.pop         = BuiltInFunction("pop")
 BuiltInFunction.extend      = BuiltInFunction("extend")
 BuiltInFunction.len         = BuiltInFunction("len")
 BuiltInFunction.run         = BuiltInFunction("run")
+BuiltInFunction.isinstance  = BuiltInFunction("isinstance")
+BuiltInFunction.hasattr     = BuiltInFunction("hasattr")
+BuiltInFunction.getattr     = BuiltInFunction("getattr")
+BuiltInFunction.setattr     = BuiltInFunction("setattr")
+BuiltInFunction.str         = BuiltInFunction("str")
+
+class Class(Value):
+  def __init__(self, name, methods, parent_class=None):
+    super().__init__()
+    self.name = name
+    self.methods = methods  # Dictionary of method name -> Method object
+    self.parent_class = parent_class  # For inheritance
+
+  def get_method(self, method_name):
+    # Look for method in this class first
+    if method_name in self.methods:
+      return self.methods[method_name]
+
+    # Look in parent class if not found
+    if self.parent_class:
+      return self.parent_class.get_method(method_name)
+
+    return None
+
+  def create_instance(self, arguments, position_start):
+    from interpreter import Interpreter
+    runtimeResult = RuntimeResult()
+
+    # Create new instance
+    instance = Instance(self)
+
+    # Look for constructor (__init__ method)
+    constructor = self.get_method('__init__')
+    if constructor:
+      # Call constructor with instance as 'self'
+      interpreter = Interpreter()
+      execution_context = constructor.generate_new_context(position_start)
+
+      # Add 'self' as first argument (constructor already has 'self' in argument_names)
+      all_arguments = [instance] + arguments
+
+      runtimeResult.register(constructor.check_and_populate_args(
+        constructor.argument_names,
+        all_arguments,
+        execution_context
+      ))
+      if runtimeResult.should_return(): return runtimeResult
+
+      # Execute constructor body
+      value = runtimeResult.register(interpreter.visit(constructor.body_node, execution_context))
+      if runtimeResult.should_return() and runtimeResult.function_return_value is None:
+        return runtimeResult
+
+    return runtimeResult.success(instance)
+
+  def copy(self):
+    copy = Class(self.name, self.methods.copy(), self.parent_class)
+    copy.set_context(self.context)
+    copy.set_position(self.position_start, self.position_end)
+    return copy
+
+  def __repr__(self):
+    return f"<class {self.name}>"
+
+class Instance(Value):
+  def __init__(self, class_def):
+    super().__init__()
+    self.class_def = class_def
+    self.attributes = {}  # Instance attributes
+
+  def get_attribute(self, attribute_name):
+    # Look for attribute in instance first
+    if attribute_name in self.attributes:
+      return self.attributes[attribute_name]
+
+    # Look for method in class
+    method = self.class_def.get_method(attribute_name)
+    if method:
+      # Return a bound method
+      return BoundMethod(self, method)
+
+    return None
+
+  def set_attribute(self, attribute_name, value):
+    self.attributes[attribute_name] = value
+
+  def copy(self):
+    copy = Instance(self.class_def)
+    copy.attributes = self.attributes.copy()
+    copy.set_context(self.context)
+    copy.set_position(self.position_start, self.position_end)
+    return copy
+
+  def __repr__(self):
+    return f"<{self.class_def.name} instance>"
+
+class Method(BaseFunction):
+  def __init__(self, name, body_node, argument_names, should_auto_return, is_constructor=False):
+    super().__init__(name)
+    self.body_node = body_node
+    # Always include 'self' as the first parameter for methods
+    self.argument_names = ['self'] + argument_names
+    self.should_auto_return = should_auto_return
+    self.is_constructor = is_constructor
+
+  def execute(self, node, arguments, position_start):
+    from interpreter import Interpreter
+    _ = node
+    runtimeResult = RuntimeResult()
+    interpreter = Interpreter()
+    execution_context = self.generate_new_context(position_start)
+
+    runtimeResult.register(self.check_and_populate_args(self.argument_names, arguments, execution_context))
+    if runtimeResult.should_return(): return runtimeResult
+
+    value = runtimeResult.register(interpreter.visit(self.body_node, execution_context))
+    if runtimeResult.should_return() and runtimeResult.function_return_value is None: return runtimeResult
+
+    if self.should_auto_return: return_value = value
+    elif runtimeResult.function_return_value is not None:
+      return_value = runtimeResult.function_return_value
+    else: return_value = Number.null
+
+    return runtimeResult.success(return_value)
+
+  def copy(self):
+    copy = Method(self.name, self.body_node, self.argument_names, self.should_auto_return, self.is_constructor)
+    copy.set_context(self.context)
+    copy.set_position(self.position_start, self.position_end)
+    return copy
+
+  def __repr__(self):
+    return f"<method {self.name}>"
+
+class BoundMethod(Value):
+  def __init__(self, instance, method):
+    super().__init__()
+    self.instance = instance
+    self.method = method
+
+  def execute(self, node, arguments, position_start):
+    # Add 'self' (the instance) as the first argument
+    all_arguments = [self.instance] + arguments
+    return self.method.execute(node, all_arguments, position_start)
+
+  def copy(self):
+    copy = BoundMethod(self.instance, self.method)
+    copy.set_context(self.context)
+    copy.set_position(self.position_start, self.position_end)
+    return copy
+
+  def __repr__(self):
+    return f"<bound method {self.method.name} of {self.instance}>"

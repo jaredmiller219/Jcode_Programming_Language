@@ -54,7 +54,11 @@ class Interpreter:
         context
       ))
 
-    value = value.copy().set_position(node.position_start, node.position_end).set_context(context)
+    # Don't copy instances to preserve attribute state
+    if isinstance(value, Instance):
+      value = value.set_position(node.position_start, node.position_end).set_context(context)
+    else:
+      value = value.copy().set_position(node.position_start, node.position_end).set_context(context)
     return runtimeResult.success(value)
 
   def visit_VarAssignNode(self, node, context):
@@ -339,3 +343,150 @@ class Interpreter:
       return runtimeResult.failure(error)
     else:
       return runtimeResult.success(result.set_position(node.position_start, node.position_end))
+
+  def visit_ClassDefNode(self, node, context):
+    runtimeResult = RuntimeResult()
+
+    class_name = node.class_name_token.value
+
+    # Get parent class if specified
+    parent_class = None
+    if node.parent_class_token:
+      parent_class_name = node.parent_class_token.value
+      parent_class = context.symbol_table.get(parent_class_name)
+      if parent_class is None:
+        return runtimeResult.failure(RuntimeError(
+          node.parent_class_token.position_start, node.parent_class_token.position_end,
+          f"Parent class '{parent_class_name}' is not defined",
+          context
+        ))
+      if not isinstance(parent_class, Class):
+        return runtimeResult.failure(RuntimeError(
+          node.parent_class_token.position_start, node.parent_class_token.position_end,
+          f"'{parent_class_name}' is not a class",
+          context
+        ))
+
+    # Process methods
+    methods = {}
+    for method_node in node.method_nodes:
+      method_name = method_node.method_name_token.value
+      argument_names = [arg.value for arg in method_node.argument_name_tokens]
+
+      method = Method(
+        method_name,
+        method_node.body_node,
+        argument_names,
+        method_node.should_auto_return,
+        method_node.is_constructor
+      ).set_context(context).set_position(method_node.position_start, method_node.position_end)
+
+      methods[method_name] = method
+
+    # Create class
+    class_value = Class(class_name, methods, parent_class).set_context(context).set_position(node.position_start, node.position_end)
+
+    # Add class to symbol table
+    context.symbol_table.set(class_name, class_value)
+
+    return runtimeResult.success(class_value)
+
+  def visit_InstanceCreationNode(self, node, context):
+    runtimeResult = RuntimeResult()
+
+    class_name = node.class_name_token.value
+    class_def = context.symbol_table.get(class_name)
+
+    if class_def is None:
+      return runtimeResult.failure(RuntimeError(
+        node.class_name_token.position_start, node.class_name_token.position_end,
+        f"Class '{class_name}' is not defined",
+        context
+      ))
+
+    if not isinstance(class_def, Class):
+      return runtimeResult.failure(RuntimeError(
+        node.class_name_token.position_start, node.class_name_token.position_end,
+        f"'{class_name}' is not a class",
+        context
+      ))
+
+    # Evaluate constructor arguments
+    arguments = []
+    for arg_node in node.argument_nodes:
+      arguments.append(runtimeResult.register(self.visit(arg_node, context)))
+      if runtimeResult.should_return(): return runtimeResult
+
+    # Create instance
+    instance = runtimeResult.register(class_def.create_instance(arguments, node.position_start))
+    if runtimeResult.should_return(): return runtimeResult
+
+    return runtimeResult.success(instance.set_position(node.position_start, node.position_end))
+
+  def visit_AttributeAccessNode(self, node, context):
+    runtimeResult = RuntimeResult()
+
+    # Get the object
+    obj = runtimeResult.register(self.visit(node.object_node, context))
+    if runtimeResult.should_return(): return runtimeResult
+
+    attribute_name = node.attribute_name_token.value
+
+    if isinstance(obj, Instance):
+      attribute = obj.get_attribute(attribute_name)
+      if attribute is None:
+        return runtimeResult.failure(RuntimeError(
+          node.attribute_name_token.position_start, node.attribute_name_token.position_end,
+          f"'{obj.class_def.name}' object has no attribute '{attribute_name}'",
+          context
+        ))
+      return runtimeResult.success(attribute.set_position(node.position_start, node.position_end))
+    else:
+      return runtimeResult.failure(RuntimeError(
+        node.object_node.position_start, node.object_node.position_end,
+        f"Cannot access attribute of non-object",
+        context
+      ))
+
+  def visit_MethodCallNode(self, node, context):
+    runtimeResult = RuntimeResult()
+
+    # Get the object
+    obj = runtimeResult.register(self.visit(node.object_node, context))
+    if runtimeResult.should_return(): return runtimeResult
+
+    method_name = node.method_name_token.value
+
+    if isinstance(obj, Instance):
+      method = obj.get_attribute(method_name)
+      if method is None:
+        return runtimeResult.failure(RuntimeError(
+          node.method_name_token.position_start, node.method_name_token.position_end,
+          f"'{obj.class_def.name}' object has no method '{method_name}'",
+          context
+        ))
+
+      if not isinstance(method, BoundMethod):
+        return runtimeResult.failure(RuntimeError(
+          node.method_name_token.position_start, node.method_name_token.position_end,
+          f"'{method_name}' is not a method",
+          context
+        ))
+
+      # Evaluate arguments
+      arguments = []
+      for arg_node in node.argument_nodes:
+        arguments.append(runtimeResult.register(self.visit(arg_node, context)))
+        if runtimeResult.should_return(): return runtimeResult
+
+      # Call method
+      result = runtimeResult.register(method.execute(node, arguments, node.position_start))
+      if runtimeResult.should_return(): return runtimeResult
+
+      return runtimeResult.success(result.set_position(node.position_start, node.position_end))
+    else:
+      return runtimeResult.failure(RuntimeError(
+        node.object_node.position_start, node.object_node.position_end,
+        f"Cannot call method on non-object",
+        context
+      ))

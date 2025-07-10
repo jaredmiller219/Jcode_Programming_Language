@@ -1,0 +1,136 @@
+# JCode Class Example - Complete Demonstration
+# This file demonstrates all class functionality in JCode
+
+class Person {
+    func __init__(string name, int age) {
+        setattr(self, "name", name)
+        setattr(self, "age", age)
+        setattr(self, "energy", 100)
+    }
+
+    func get_info() {
+        string name = getattr(self, "name", "Unknown")
+        int age = getattr(self, "age", 0)
+        return name + " is " + str(age) + " years old"
+    }
+
+    func birthday() {
+        int current_age = getattr(self, "age", 0)
+        setattr(self, "age", current_age + 1)
+        print("Happy birthday! Now " + str(getattr(self, "age", 0)) + " years old")
+    }
+
+    func greet(string other_name) {
+        string name = getattr(self, "name", "Unknown")
+        return "Hello " + other_name + ", I'm " + name
+    }
+
+    func rest() {
+        int current_energy = getattr(self, "energy", 0)
+        setattr(self, "energy", current_energy + 20)
+        return "Resting... energy is now " + str(getattr(self, "energy", 0))
+    }
+}
+
+
+class Student extends Person {
+    func __init__(string name, int age, string school) {
+        setattr(self, "name", name)
+        setattr(self, "age", age)
+        setattr(self, "energy", 100)
+        setattr(self, "school", school)
+        setattr(self, "grades", [])
+        setattr(self, "study_hours", 0)
+    }
+
+    func get_info() {
+        string name = getattr(self, "name", "Unknown")
+        int age = getattr(self, "age", 0)
+        string school = getattr(self, "school", "Unknown School")
+        return name + " is " + str(age) + " years old and studies at " + school
+    }
+
+    func add_grade(int grade) {
+        list grades = getattr(self, "grades", [])
+        append(grades, grade)
+        setattr(self, "grades", grades)
+    }
+
+    func study(int hours) {
+        int current_hours = getattr(self, "study_hours", 0)
+        setattr(self, "study_hours", current_hours + hours)
+        int current_energy = getattr(self, "energy", 0)
+        setattr(self, "energy", current_energy - hours * 5)
+        return "Studied for " + str(hours) + " hours. Total study time: " + str(getattr(self, "study_hours", 0))
+    }
+
+    func get_average() {
+        list grades = getattr(self, "grades", [])
+        if len(grades) == 0:
+            return 0
+
+        int total = 0
+        for i = 0 to len(grades) {
+            var total: total + grades[i]
+        }
+        return total / len(grades)
+    }
+}
+
+
+print("=== JCode Class System Demo ===")
+
+print("1. Creating instances...")
+var person: new Person("Alice", 25)
+var student: new Student("Bob", 20, "JCode University")
+
+print("2. Basic info:")
+print("Person: " + person.get_info())
+print("Student: " + student.get_info())
+
+print("")
+print("3. Method calls:")
+print(person.greet("World"))
+print(student.greet("Alice"))
+
+print("")
+print("4. Inheritance - same method, different behavior:")
+person.birthday()
+student.birthday()
+
+print("")
+print("5. Student-specific functionality:")
+student.add_grade(85)
+student.add_grade(92)
+student.add_grade(78)
+print("Average grade: " + str(student.get_average()))
+print(student.study(3))
+
+print("")
+print("6. Attribute manipulation:")
+print("Before rest - Person energy: " + str(getattr(person, "energy", 0)))
+print(person.rest())
+print("Student study hours: " + str(getattr(student, "study_hours", 0)))
+
+print("")
+print("7. Built-in class functions:")
+print("person is Person: " + str(isinstance(person, Person)))
+print("student is Person: " + str(isinstance(student, Person)))
+print("student is Student: " + str(isinstance(student, Student)))
+print("person is Student: " + str(isinstance(person, Student)))
+
+print("")
+print("8. Attribute checking:")
+print("person has 'name': " + str(hasattr(person, "name")))
+print("person has 'school': " + str(hasattr(person, "school")))
+print("student has 'school': " + str(hasattr(student, "school")))
+print("student has 'grades': " + str(hasattr(student, "grades")))
+
+print("")
+print("9. Dynamic attribute access:")
+print("person name: " + getattr(person, "name", "Unknown"))
+print("person school (default): " + getattr(person, "school", "No School"))
+print("student school: " + getattr(student, "school", "Unknown"))
+
+print("")
+print("=== All class features working perfectly! ===")

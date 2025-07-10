@@ -1,0 +1,50 @@
+# Test setattr/getattr functionality
+
+class Person {
+    func __init__(string name, int age) {
+        print("Setting attributes in constructor...")
+        setattr(self, "name", name)
+        setattr(self, "age", age)
+        print("Constructor finished")
+    }
+
+    func get_name() {
+        return getattr(self, "name", "Unknown")
+    }
+
+    func get_age() {
+        return getattr(self, "age", 0)
+    }
+
+    func set_age(int new_age) {
+        setattr(self, "age", new_age)
+    }
+
+    func get_info() {
+        string name = getattr(self, "name", "Unknown")
+        int age = getattr(self, "age", 0)
+        return name + " is " + str(age) + " years old"
+    }
+}
+
+print("=== Testing Attributes ===")
+
+var person: new Person("Alice", 25)
+
+print("Name: " + person.get_name())
+print("Age: " + str(person.get_age()))
+print("Info: " + person.get_info())
+
+print("Changing age...")
+person.set_age(26)
+print("New age: " + str(person.get_age()))
+print("New info: " + person.get_info())
+
+print("Testing hasattr:")
+print("Has name: " + str(hasattr(person, "name")))
+print("Has age: " + str(hasattr(person, "age")))
+print("Has height: " + str(hasattr(person, "height")))
+
+print("Testing getattr with default:")
+print("Height (default 0): " + str(getattr(person, "height", 0)))
+print("Weight (default 'Unknown'): " + getattr(person, "weight", "Unknown"))

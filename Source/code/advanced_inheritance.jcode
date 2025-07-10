@@ -1,0 +1,52 @@
+class Animal {
+    func __init__(string name) {
+        setattr(self, "name", name)
+        setattr(self, "energy", 100)
+    }
+
+    func speak() {
+        return getattr(self, "name", "Unknown") + " makes a sound"
+    }
+
+    func get_info() {
+        string name = getattr(self, "name", "Unknown")
+        int energy = getattr(self, "energy", 0)
+        return name + " has " + str(energy) + " energy"
+    }
+}
+
+
+class Dog extends Animal {
+    func __init__(string name) {
+        setattr(self, "name", name)
+        setattr(self, "energy", 100)
+        setattr(self, "breed", "Mixed")
+    }
+
+    func speak() {
+        return getattr(self, "name", "Unknown") + " barks: Woof!"
+    }
+
+    func get_info() {
+        string name = getattr(self, "name", "Unknown")
+        int energy = getattr(self, "energy", 0)
+        return name + " is a dog with " + str(energy) + " energy"
+    }
+}
+
+
+print("=== Testing Inheritance ===")
+
+var animal: new Animal("Rex")
+var dog: new Dog("Buddy")
+
+print("Animal info: " + animal.get_info())
+print("Dog info: " + dog.get_info())
+
+print("Animal speaks: " + animal.speak())
+print("Dog speaks: " + dog.speak())
+
+print("Inheritance tests:")
+print("dog is Animal: " + str(isinstance(dog, Animal)))
+print("dog is Dog: " + str(isinstance(dog, Dog)))
+print("animal is Dog: " + str(isinstance(animal, Dog)))

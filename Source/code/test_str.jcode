@@ -1,0 +1,11 @@
+# Test str function
+
+print("Testing str function:")
+print("str(1): " + str(1))
+print("str(0): " + str(0))
+
+var result_true: true
+var result_false: false
+
+print("str(true variable): " + str(result_true))
+print("str(false variable): " + str(result_false))

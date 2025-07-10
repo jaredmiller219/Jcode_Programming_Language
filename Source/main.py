@@ -33,6 +33,11 @@ builtins = {
     "extend":      BuiltInFunction.extend,
     "len":         BuiltInFunction.len,
     "run":         BuiltInFunction.run,
+    "isinstance":  BuiltInFunction.isinstance,
+    "hasattr":     BuiltInFunction.hasattr,
+    "getattr":     BuiltInFunction.getattr,
+    "setattr":     BuiltInFunction.setattr,
+    "str":         BuiltInFunction.str,
 }
 
 for name, value in builtins.items():

@@ -133,6 +133,9 @@ class Lexer:
             elif self.current_character == ',':
               tokens.append(Token(TT_COMMA, position_start=self.position))
               self.advance()
+            elif self.current_character == '.':
+              tokens.append(Token(TT_DOT, position_start=self.position))
+              self.advance()
             else:
               position_start = self.position.copy()
               char = self.current_character

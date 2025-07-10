@@ -1,0 +1,39 @@
+# Test inheritance
+
+class Animal {
+    func __init__(string name) {
+        print("Animal constructor: " + name)
+    }
+    
+    func speak() {
+        print("Animal makes a sound")
+    }
+}
+
+class Dog extends Animal {
+    func __init__(string name) {
+        print("Dog constructor: " + name)
+    }
+    
+    func speak() {
+        print("Dog barks: Woof!")
+    }
+}
+
+# Test inheritance
+print("=== Testing Inheritance ===")
+
+var animal: new Animal("Generic Animal")
+animal.speak()
+
+print("")
+
+var dog: new Dog("Buddy")
+dog.speak()
+
+print("")
+print("Testing isinstance:")
+print("animal is Animal: " + str(isinstance(animal, Animal)))
+print("dog is Animal: " + str(isinstance(dog, Animal)))
+print("dog is Dog: " + str(isinstance(dog, Dog)))
+print("animal is Dog: " + str(isinstance(animal, Dog)))

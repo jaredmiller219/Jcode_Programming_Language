@@ -1,0 +1,24 @@
+# Debug isinstance
+
+class Dog {
+    func test() {
+        print("Dog test")
+    }
+}
+
+var my_dog: new Dog()
+print("Testing isinstance...")
+print("my_dog type: " + str(my_dog))
+
+# Test if isinstance is working at all
+if isinstance(my_dog, Dog):
+    print("isinstance returned true")
+else:
+    print("isinstance returned false")
+
+print("Direct boolean tests:")
+print("true: " + str(true))
+print("false: " + str(false))
+
+print("isinstance results:")
+print("isinstance(my_dog, Dog): " + str(isinstance(my_dog, Dog)))

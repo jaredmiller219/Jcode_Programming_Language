@@ -1,0 +1,23 @@
+# Simple class example for testing
+
+class Dog {
+    func __init__(string name) {
+        print("Constructor called with name: " + name)
+    }
+
+    func get_name() {
+        return "Buddy"
+    }
+
+    func test() {
+        print("Dog test method called")
+    }
+}
+
+# Test the class
+print("Creating a dog...")
+var my_dog: new Dog("Buddy")
+
+print("Dog's name: " + my_dog.get_name())
+print("Testing method call:")
+my_dog.test()
