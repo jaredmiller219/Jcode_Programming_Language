@@ -91,9 +91,9 @@ def handle_ls(path: str):
         combined_entries = directories + files
 
         if combined_entries:
-            print("==============================")
+            print("============================================================")
             print(f"Directory: {folder_label}")
-            print("==============================")
+            print("============================================================")
             max_len = max(len(name) for name in combined_entries) + 2
             columns = 3
             for i, name in enumerate(combined_entries, 1):
@@ -102,6 +102,7 @@ def handle_ls(path: str):
                     print()
             if len(combined_entries) % columns != 0:
                 print()
+            print("============================================================")
         else:
             print(f"{closed_folder_icon} {folder_label} (empty)")
 
