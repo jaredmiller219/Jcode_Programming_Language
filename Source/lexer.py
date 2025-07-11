@@ -204,7 +204,7 @@ class Lexer:
       return Token(TT_NOT_EQUAL, position_start=position_start, position_end=self.position), None
 
     self.advance()
-    return None, ExpectedCharError(position_start, self.position, "'=' (after '!')")
+    return None, ExpectedCharacterError(position_start, self.position, "'=' (after '!')")
 
   def equalize(self):
     token_type = TT_EQUAL

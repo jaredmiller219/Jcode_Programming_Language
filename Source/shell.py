@@ -1,8 +1,21 @@
 import readline
 import os
 import pyfiglet
+import sys
 
-from main import run
+# Temporarily add the Source directory to sys.path if not already there
+source_dir = os.path.dirname(os.path.abspath(__file__))
+if source_dir not in sys.path:
+    sys.path.insert(0, source_dir)
+
+# Now we can import from the local main module
+try:
+    from main import run
+except ImportError:
+    # Fallback: define a simple run function
+    def run(filename, text):
+        print("Error: Could not import run function from main module")
+        return None, "Import error"
 
 _ = readline  # mark as used to silence Pyright
 
@@ -192,8 +205,7 @@ def run_shell(shell_state):
             shell_state.set_keyboard_interrupt()
             break
 
-
-if __name__ == "__main__":
+def run_shell_program():
     print_art()
     shell_state = ShellState()
     run_shell(shell_state)
@@ -202,3 +214,7 @@ if __name__ == "__main__":
         print("\nTerminated Shell!")
     else:
         print("Shell session terminated")
+
+
+if __name__ == "__main__":
+    run_shell_program()

@@ -47,6 +47,7 @@ def shell_script() -> bool:
         "rm": commands.handle_rm,
         "edit": commands.handle_edit,
         "runfile": commands.handle_runfile,
+        "jcode": commands.handle_jcode,
     }
 
     if command in ["clear", "cl", "cls"]:

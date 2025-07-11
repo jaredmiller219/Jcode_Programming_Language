@@ -1,6 +1,9 @@
 import os
-from helpers import *
+import sys
 
+from helpers import *
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+from Source.shell import *
 
 def handle_help():
     print("=" * 40)
@@ -191,6 +194,9 @@ def handle_mkdir(folder_name: str):
 
 def handle_exit():
     print("Ending current session.")
+
+def handle_jcode():
+   run_shell_program() 
 
 
 def handle_unknown(command: str):
