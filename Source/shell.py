@@ -178,6 +178,7 @@ def run_shell(shell_state):
     - Evaluates input using `basic.run`.
     - Gracefully exits on Ctrl+C or EOF.
     """
+    os.system('cls' if os.name == 'nt' else 'clear')
     while True:
         try:
             text = input('Shell > ').strip()
@@ -206,7 +207,7 @@ def run_shell(shell_state):
             break
 
 def run_shell_program():
-    print_art()
+    # print_art()
     shell_state = ShellState()
     run_shell(shell_state)
 
